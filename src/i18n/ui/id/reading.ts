@@ -1,0 +1,76 @@
+// src/i18n/ui/id/reading.ts - kamus Indonesia, bagian "reading" : yang mengelilingi artikel.
+
+export const idReading = {
+  post: {
+    minRead: "{n} menit dibaca",
+    minReadOne: "1 menit dibaca",
+    published: "Diterbitkan pada",
+    updated: "Diperbarui pada",
+    updatedNote: "Direvisi setelah publikasi.",
+    writtenBy: "Ditulis oleh",
+    toc: "Di halaman ini",
+    tocLabel: "Daftar isi",
+    topicLabel: "Topik",
+    tagsLabel: "Tag",
+    share: "Bagikan",
+    shareOn: "Bagikan ke {network}",
+    networkEmail: "Email",
+    networkX: "X",
+    copyLink: "Salin tautan",
+    linkCopied: "Tautan tersalin",
+    previousPost: "Artikel sebelumnya",
+    nextPost: "Artikel berikutnya",
+    navLabel: "Navigasi artikel",
+    keepReading: "Lanjut membaca",
+    keepReadingAccent: "membaca",
+    keepReadingLede: "Tiga catatan lain dari buku catatan yang sama, dipilih berdasarkan topik, bukan algoritma.",
+    keepReadingCta: "Semua artikel",
+    aboutAuthor: "Tentang penulis",
+    moreFromAuthor: "Lebih banyak dari {name}",
+    backToPosts: "Kembali ke semua artikel",
+    coverCredit: "Cover: {credit}",
+    draft: "Draf",
+    draftNote:
+      "Artikel ini belum dipublikasikan. Ini dibuat secara lokal untuk pratinjau dan tidak muncul di daftar, RSS, sitemap, maupun pencarian.",
+  },
+
+  archive: {
+    metaTitle: "Semua artikel",
+    metaDescription:
+      "Setiap artikel yang dipublikasikan di Reef Notes, terbaru dulu: catatan build, kerja performa, tipografi, dan bisnis studio kecil.",
+    crumb: "Semua artikel",
+    eyebrow: "Arsip",
+    title: "Semua yang telah kami tulis",
+    accent: "Semua",
+    lede:
+      "Arsip lengkap, terbaru dulu. Tiga puluh detik scroll lebih baik daripada kotak pencarian saat Anda belum tahu apa yang dicari.",
+    pageSuffix: "halaman {n}",
+    listLabel: "Daftar artikel",
+    paginationLabel: "Paginasi artikel",
+    topicTitle: "Artikel dalam topik {topic}",
+    authorTitle: "Artikel oleh {name}",
+    tagTitle: "Artikel dengan tag {tag}",
+    countLabel: "{count} artikel",
+    countOne: "1 artikel",
+    emptyTitle: "Belum ada isi di sini",
+    emptyLede:
+      "Tidak ada artikel yang cocok dengan halaman ini. Arsip diisi beberapa minggu lagi, dan RSS akan memberi tahu saat artikel baru muncul.",
+    emptyCta: "Kembali ke semua artikel",
+  },
+
+  newsletter: {
+    title: "Satu email, sekali sebulan",
+    accent: "sekali",
+    lede:
+      "Ringkasan singkat tentang apa yang kami terbitkan dan apa yang salah. Tanpa tracking pixel, tanpa urutan drip, dan satu klik untuk berhenti selamanya.",
+    emailLabel: "Email Anda",
+    placeholder: "anda@example.com",
+    submit: "Langganan",
+    note: "Satu email sebulan. Batalkan kapan saja.",
+    success: "Hampir selesai. Konfirmasi langganan dari email yang baru kami kirim.",
+    error: "Alamat itu gagal. Periksa dan coba lagi.",
+    rssTitle: "Mau feed?",
+    rssLede: "Seluruh blog ada di RSS, teks lengkap, tanpa signup.",
+    rssCta: "RSS feed",
+  },
+} as const;

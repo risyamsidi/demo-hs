@@ -1,0 +1,23 @@
+---
+// src/pages/[...locale]/blog/[...page].astro - l'archive complete, paginee par neuf.
+//
+// La page 1 vit a /blog/, les suivantes a /blog/2/ ; en francais /fr/blog/ et
+// /fr/blog/2/. Une passe de pagination PAR LANGUE, parce que deux langues n'ont
+// pas forcement le meme nombre de billets publies et donc pas le meme nombre de
+// pages. Les chemins vivent dans @js/archive, le rendu dans ArchivePage.
+import ArchivePage from "@components/Pages/ArchivePage.astro";
+import { cheminsArchive, type PropsArchive } from "@js/archive";
+import { propsDeLaPage } from "@moteur/chemins";
+import { textesDeLaPage } from "@moteur/textes";
+
+export const getStaticPaths = cheminsArchive;
+
+const props = await propsDeLaPage<PropsArchive>(Astro, cheminsArchive);
+if (props instanceof Response) return props;
+
+// Les textes rediges de la page : ceux de la base moteur allume (docs/moteur.md),
+// poses sur la requete pour ArchivePage.
+await textesDeLaPage(Astro);
+---
+
+<ArchivePage {...props} />

@@ -1,0 +1,54 @@
+---
+// src/pages/[...locale]/search.astro - la recherche : index construit au build, filtrage dans le navigateur, aucune requete et aucun service tiers.
+//
+// noindex : une page de recherche interne n'a rien a apporter a un moteur, et
+// laisser indexer des URLs a parametres est la meilleure facon de diluer un
+// site dans son propre bruit.
+import Search from "@components/Sections/Search/Search.astro";
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import PageHero from "@components/Sections/Global/PageHero.astro";
+import { getLocale, localePaths } from "@i18n";
+import { getResolvedPosts } from "@js/posts";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { imageDePartage } from "@moteur/cadre";
+import { annotationsDe } from "@moteur/annotations";
+import { propsDeLaPage } from "@moteur/chemins";
+import { textesDeLaPage } from "@moteur/textes";
+
+export const getStaticPaths = localePaths;
+
+// Moteur allume, cette page se rend a la demande et [...locale] accepte
+// n'importe quel segment : une langue inconnue repond 404, comme au build.
+const demande = await propsDeLaPage(Astro, getStaticPaths);
+if (demande instanceof Response) return demande;
+
+const locale = getLocale(Astro);
+// Les textes rediges de la page : ceux de la base moteur allume (docs/moteur.md),
+// poses sur la requete pour ses composants.
+const t = await textesDeLaPage(Astro);
+const posts = await getResolvedPosts(locale);
+
+const title = t.search.metaTitle;
+const description = t.search.metaDescription;
+---
+
+<BaseLayout {title} {description} noindex image={imageDePartage(Astro, "recherche")}>
+  <Navbar />
+
+  <main id="content">
+    <PageHero
+      cle="recherche"
+      edition={annotationsDe(Astro, "recherche")}
+      eyebrow={t.search.eyebrow}
+      title={t.search.title}
+      accentWord={t.search.accent}
+      lede={t.search.lede}
+      crumbs={[{ label: t.search.crumb }]}
+    />
+
+    <Search {posts} />
+  </main>
+
+  <Footer />
+</BaseLayout>

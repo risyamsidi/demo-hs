@@ -1,0 +1,117 @@
+---
+// src/components/Sections/Global/NotFound.astro - l'ecran de la page introuvable, dans la langue de l'adresse : autonome, sans barre ni pied de page, exclu des moteurs.
+//
+// Une page par langue : 404.html pour l'anglais (src/pages/404.astro),
+// fr/404.html pour le francais (src/pages/[locale]/404.astro). Un hebergeur
+// statique sert le 404.html le plus proche de l'adresse demandee, et le Worker
+// du moteur fait de meme (src/worker-adresses.ts).
+//
+// Elle ne porte NI barre NI pied de page, ce qui est un choix et pas un
+// oubli : le selecteur de langue de la barre calcule ses liens depuis l'URL
+// courante, et sur une 404 cette URL n'existe dans aucune langue. Il pointerait
+// donc vers une seconde page introuvable. A la place, l'ecran offre la racine
+// de chaque autre langue, nommee dans sa propre langue. Pour la meme raison,
+// le head ne declare ni canonical ni hreflang (prop `introuvable`).
+import { Icon } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
+import { getLocale, isLocale, localeMeta, localePrefix, locales, useTranslations, type Locale } from "@i18n";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { annotationsDe, styleDuBloc } from "@moteur/annotations";
+import { argumentDe, lienDe } from "@moteur/cadre";
+import Pastilles from "@moteur/Pastilles.astro";
+import { textesDeLaPage } from "@moteur/textes";
+
+// La langue de l'adresse : moteur allume, cette page se rend a la demande pour
+// toute adresse introuvable, /fr/... comprise, et c'est le premier segment qui
+// dit la langue. Figee (moteur eteint, ou fr/404.html), le meme calcul donne
+// la langue de la page.
+const tete = Astro.url.pathname.split("/")[1] ?? "";
+const locale: Locale = isLocale(tete) ? tete : getLocale(Astro);
+// Moteur allume, les textes viennent de l'entree "introuvable" (collection des
+// textes des pages) ; moteur eteint, des fichiers, comme avant.
+await textesDeLaPage(Astro, locale);
+const t = useTranslations(Astro);
+const page = annotationsDe(Astro, "introuvable");
+const title = t.notFound.metaTitle;
+const description = t.notFound.metaDescription;
+
+// Decoupe du titre autour du mot accentue.
+const heading = t.notFound.title;
+const accent = t.notFound.accent;
+const at = heading.toLowerCase().indexOf(accent.toLowerCase());
+const before = at >= 0 ? heading.slice(0, at) : heading;
+const word = at >= 0 ? heading.slice(at, at + accent.length) : "";
+const after = at >= 0 ? heading.slice(at + accent.length) : "";
+
+const others = locales.filter((autre) => autre !== locale);
+// Les trois boutons : l'adresse saisie dans le back office, sinon celle du
+// theme (le troisieme lit le sous-champ "link" de la ligne de ses elements).
+const root = `${localePrefix(locale)}/`;
+const texte = (valeur: unknown): string | null => (typeof valeur === "string" && valeur.trim() !== "" ? valeur.trim() : null);
+const liens = {
+  accueil: lienDe(Astro, "introuvable", "cta_link") ?? root,
+  billets: lienDe(Astro, "introuvable", "cta_secondary_link") ?? `${localePrefix(locale)}/blog/`,
+  recherche: texte(argumentDe(Astro, "introuvable", 0).link) ?? `${localePrefix(locale)}/search/`,
+};
+---
+
+
+<BaseLayout {title} {description} noindex introuvable>
+  <main id="content" class="grid min-h-dvh place-items-center py-20" {...page.entree} style={styleDuBloc(Astro, "introuvable")}>
+    <Pastilles cle="introuvable" liens={[["cta_link", root], ["cta_secondary_link", `${localePrefix(locale)}/blog/`]]} />
+    <div class="container-page flex flex-col items-center gap-6 text-center">
+      <p class="font-display text-primary text-display-lg leading-none font-semibold" aria-hidden="true" {...page.champ("eyebrow")}>
+        {t.notFound.code}
+      </p>
+
+      <h1 class="font-display text-display-sm md:text-display-md text-foreground" {...page.champ("title")}>
+        {
+          word ? (
+            <Fragment>
+              {before}
+              <span class="accent-script" {...page.champ("accent")}>{word}</span>
+              {after}
+            </Fragment>
+          ) : (
+            heading
+          )
+        }
+      </h1>
+
+      <p class="text-muted-foreground measure-prose text-lg leading-relaxed" {...page.champ("lede")}>{t.notFound.lede}</p>
+
+      <div class="mt-2 flex flex-wrap items-center justify-center gap-3">
+        <Button href={liens.accueil} variant="primary" size="lg" {...page.champ("cta")}>
+          {t.notFound.homeCta}
+        </Button>
+        <Button href={liens.billets} variant="outline" size="lg" {...page.champ("cta_secondary")}>
+          {t.notFound.postsCta}
+        </Button>
+        <Button href={liens.recherche} variant="ghost" size="lg" {...page.champ("arguments")}>
+          <Icon name="search" size={17} />
+          {t.notFound.searchCta}
+        </Button>
+      </div>
+
+      {
+        others.length > 0 && (
+          <ul class="mt-6 flex flex-wrap items-center justify-center gap-4">
+            {others.map((locale) => (
+              <li>
+                <a
+                  href={`${localePrefix(locale)}/`}
+                  hreflang={localeMeta[locale].htmlLang}
+                  lang={localeMeta[locale].htmlLang}
+                  class="text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center gap-1.5 font-sans text-sm underline underline-offset-4 transition-colors duration-150"
+                >
+                  {localeMeta[locale].label}
+                  <Icon name="arrow-right" size={15} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,46 @@
+---
+// src/pages/[...locale]/blog/[id].astro - la route d'un billet : une par billet ET par langue.
+//
+// Les id de collection sont prefixes ("fr/mon-billet") parce que le contenu est
+// range par langue ; l'URL, elle, ne porte que le slug, le prefixe etant deja
+// dans le param locale. C'est ce qui permet au selecteur de langue d'emmener le
+// lecteur sur LA traduction du billet qu'il lit, et pas sur l'accueil.
+//
+// Le rendu vit dans ArticlePage. Cette route ne fait qu'aiguiller, parce que,
+// moteur allume, /blog/2/ arrive ICI avant la route d'archive (un parametre
+// nomme passe avant un parametre de reste) : un numero de page rend l'archive.
+import ArchivePage from "@components/Pages/ArchivePage.astro";
+import ArticlePage from "@components/Pages/ArticlePage.astro";
+import { cheminsDuBillet } from "@js/adresses";
+import { cheminsArchive, type PropsArchive } from "@js/archive";
+import { propsDeLaPage } from "@moteur/chemins";
+import { MOTEUR } from "@moteur/source";
+import { textesDeLaPage } from "@moteur/textes";
+import type { CollectionEntry } from "astro:content";
+
+// Les chemins vivent dans @js/adresses : le plan de site du moteur les rejoue
+// sans importer cette page (voir l'en-tete de ce module).
+export const getStaticPaths = cheminsDuBillet;
+
+type Props = {
+  post: CollectionEntry<"posts">;
+  author: CollectionEntry<"authors">;
+  topic: CollectionEntry<"topics">;
+};
+
+// Un numero, moteur allume, designe une page de l'archive ; tout le reste un billet.
+const numero = MOTEUR && /^\d+$/.test(Astro.params.id ?? "");
+const demande = numero
+  ? await propsDeLaPage<PropsArchive>(
+      { params: { locale: Astro.params.locale, page: Astro.params.id }, props: {} },
+      cheminsArchive,
+    )
+  : await propsDeLaPage<Props>(Astro, getStaticPaths);
+if (demande instanceof Response) return demande;
+
+// Les textes rediges de la page : ceux de la base moteur allume (docs/moteur.md),
+// poses sur la requete pour ArticlePage et ArchivePage.
+await textesDeLaPage(Astro);
+---
+
+{numero ? <ArchivePage {...(demande as PropsArchive)} /> : <ArticlePage {...(demande as Props)} />}

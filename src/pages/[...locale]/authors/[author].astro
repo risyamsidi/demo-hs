@@ -1,0 +1,133 @@
+---
+// src/pages/[...locale]/authors/[author].astro - la page d'un auteur : portrait, biographie, liens externes et tout ce qu'il a signe.
+//
+// Pas de pagination ici, volontairement : une signature qui depasse trois pages
+// de billets est un cas que le contenu de demonstration n'atteint pas, et une
+// pagination a une seule page est une pagination de trop.
+import PostGrid from "@components/Sections/Archive/PostGrid.astro";
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import { Icon } from "@components/svg/icons";
+import { Avatar } from "@components/ui/avatar";
+import { Breadcrumb } from "@components/ui/breadcrumb";
+import { Button } from "@components/ui/button";
+import { fmt, getLocale, localizePath } from "@i18n";
+import { entrySlug } from "@i18n/content";
+import { cheminsDeLAuteur } from "@js/adresses";
+import type { ResolvedPost } from "@js/posts";
+import { breadcrumbList } from "@js/schema";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { annotationsDe } from "@moteur/annotations";
+import { propsDeLaPage } from "@moteur/chemins";
+import { annotationsDeLaFiche, type PanneauSeo, seoDe } from "@moteur/listes";
+import { textesDeLaPage } from "@moteur/textes";
+import type { CollectionEntry } from "astro:content";
+
+export const getStaticPaths = cheminsDeLAuteur;
+
+type Props = {
+  author: CollectionEntry<"authors">;
+  posts: ResolvedPost[];
+};
+
+const props = await propsDeLaPage<Props>(Astro, getStaticPaths);
+if (props instanceof Response) return props;
+const { author, posts } = props;
+const locale = getLocale(Astro);
+// Les textes rediges de la page : ceux de la base moteur allume (docs/moteur.md),
+// poses sur la requete pour ses composants.
+const t = await textesDeLaPage(Astro);
+
+const slug = entrySlug(author.id);
+// Moteur allume : le panneau SEO de l'auteur passe avant ses champs, et en
+// mode edition sa fiche (collection "auteurs") porte chaque texte de la page.
+const seo = seoDe((author as unknown as { seo?: PanneauSeo }).seo, { title: fmt(t.authors.postsBy, { name: author.data.name }), description: author.data.bio });
+const fiche = annotationsDeLaFiche(author);
+
+const base = Astro.site ?? Astro.url;
+const crumbs = breadcrumbList([
+  { name: t.common.home, url: new URL(localizePath("/", locale), base).href },
+  { name: t.authors.crumb, url: new URL(localizePath("/authors/", locale), base).href },
+  { name: author.data.name, url: new URL(localizePath(`/authors/${slug}/`, locale), base).href },
+]);
+---
+
+<BaseLayout title={seo.title} description={seo.description} noindex={seo.noindex} canonical={seo.canonical}>
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(crumbs)} />
+  </Fragment>
+
+  <Navbar />
+
+  <main id="content">
+    <section class="bg-surface border-border border-b" aria-labelledby="author-name" {...fiche.entree}>
+      <div class="container-page flex flex-col gap-6 pt-28 pb-12 md:pt-36 md:pb-16">
+        <Breadcrumb
+          label={t.common.breadcrumbLabel}
+          items={[
+            { label: t.common.home, href: localizePath("/", locale), attributs: annotationsDe(Astro, "en-tete").champ("eyebrow") },
+            { label: t.authors.crumb, href: localizePath("/authors/", locale), attributs: annotationsDe(Astro, "auteurs").champ("breadcrumb") },
+            { label: author.data.name, attributs: fiche.champ("name") },
+          ]}
+        />
+
+        <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+          <Avatar
+            name={author.data.name}
+            src={author.data.avatar?.src}
+            size="xl"
+            alt=""
+            class="size-24 shrink-0"
+            {...fiche.champ("avatar")}
+          />
+          <div class="flex flex-col gap-3">
+            <p class="font-sans text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+              {t.authors.roleLabel}
+            </p>
+            <h1 id="author-name" class="font-display text-display-sm sm:text-display-md text-foreground" {...fiche.champ("name")}>
+              {author.data.name}
+            </h1>
+            <p class="text-foreground font-sans text-base" {...fiche.champ("role")}>{author.data.role}</p>
+            <p class="text-muted-foreground measure-prose text-lg leading-relaxed" {...fiche.champ("bio")}>
+              {author.data.bio}
+            </p>
+
+            {
+              author.data.links.length > 0 && (
+                <div class="mt-2 flex flex-col gap-2">
+                  <p class="font-sans text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+                    {t.authors.linksLabel}
+                  </p>
+                  <ul class="flex flex-wrap gap-2" {...fiche.champ("links")}>
+                    {author.data.links.map((link) => (
+                      <li>
+                        <Button href={link.href} variant="outline" size="sm" rel="noopener">
+                          {link.label}
+                          <Icon name="arrow-up-right" size={15} />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <PostGrid
+      {posts}
+      {locale}
+      basePath={localizePath(`/authors/${slug}`, locale)}
+      total={posts.length}
+      headingLevel="h2"
+      emptyTitle={t.authors.emptyTitle}
+      emptyDescription={t.authors.emptyLede}
+      emptyCtaLabel={t.archive.emptyCta}
+      emptyCtaHref={localizePath("/blog/", locale)}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

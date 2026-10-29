@@ -1,0 +1,171 @@
+---
+// src/pages/[...locale]/index.astro - l'accueil editorial : ouverture, billet a la une, notes recentes, sujets, signatures, mot du studio et invitation a s'abonner.
+//
+// L'accueil d'un blog n'est pas une page commerciale : il n'y a ni preuve sociale,
+// ni tarifs, ni bandeau de logos. Un lecteur arrive pour savoir s'il y a quelque
+// chose a lire, et la reponse doit tenir dans le premier ecran et demi.
+//
+// Toutes les listes sont calculees ICI, une seule fois. Les sections recoivent
+// des tableaux deja tries : aucune d'elles ne relit une collection, donc rien ne
+// peut trier differemment d'une section a l'autre.
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import FeaturedPost from "@components/Sections/Home/FeaturedPost.astro";
+import FilmScene from "@components/Sections/Home/FilmScene.astro";
+import Hero from "@components/Sections/Home/Hero.astro";
+import LatestPosts from "@components/Sections/Home/LatestPosts.astro";
+import NewsletterInvite from "@components/Sections/Home/NewsletterInvite.astro";
+import TopicMarquee from "@components/Sections/Home/TopicMarquee.astro";
+import TopicStrip from "@components/Sections/Home/TopicStrip.astro";
+import WritersStrip from "@components/Sections/Home/WritersStrip.astro";
+import { getLocale, localePaths, locales, localizePath } from "@i18n";
+import { getResolvedPosts, getSortedTopics, getSortedAuthors } from "@js/posts";
+import { organization, website } from "@js/schema";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { blocVisible, donneesDe, imageDePartage } from "@moteur/cadre";
+import { ordreDesBlocs } from "@moteur/ordre-des-blocs";
+import { propsDeLaPage } from "@moteur/chemins";
+import { adresseDePageLibre } from "@moteur/pages";
+import { textesDeLaPage } from "@moteur/textes";
+import { identiteDuSite } from "@moteur/theme";
+
+// Une seule page source, une sortie par langue : / et /fr/.
+export const getStaticPaths = localePaths;
+
+// Moteur allume, cette page se rend a la demande et [...locale] accepte
+// n'importe quel segment : une langue inconnue repond 404, comme au build.
+// Une adresse que l'accueil ne connait pas peut etre celle d'une page libre,
+// ecrite dans le back office (collection "pages", src/moteur/pages.ts) : elle
+// est reecrite vers [...locale]/page-libre.astro, qui la rend avec le cadre du
+// site (ou repond 404). Moteur eteint, aucune.
+const demande = await propsDeLaPage(Astro, getStaticPaths);
+if (demande instanceof Response) {
+  const libre = adresseDePageLibre(Astro.params.locale);
+  if (!libre) return demande;
+  return Astro.rewrite(`${libre.locale === "en" ? "" : `/${libre.locale}`}/page-libre/`);
+}
+
+const locale = getLocale(Astro);
+// Les textes rediges de la page : ceux de la base moteur allume (docs/moteur.md),
+// poses sur la requete pour ses composants.
+const t = await textesDeLaPage(Astro);
+
+const posts = await getResolvedPosts(locale);
+
+// Le garde-fou "un seul billet a la une" vit ici : le schema ne peut pas
+// compter les autres fichiers, mais la page les voit tous. Si personne n'a
+// leve le drapeau, le plus recent prend la place.
+const featured = posts.find((entry) => entry.post.data.featured) ?? posts.at(0);
+const latest = posts.filter((entry) => entry !== featured).slice(0, 6);
+
+const topics = await getSortedTopics(locale);
+const authors = await getSortedAuthors(locale);
+
+// Un seul passage sur les billets pour les deux compteurs : compter dans les
+// sections obligerait a leur passer la liste complete, qu'elles n'affichent pas.
+const topicCounts: Record<string, number> = {};
+const authorCounts: Record<string, number> = {};
+for (const entry of posts) {
+  topicCounts[entry.topicSlug] = (topicCounts[entry.topicSlug] ?? 0) + 1;
+  authorCounts[entry.authorSlug] = (authorCounts[entry.authorSlug] ?? 0) + 1;
+}
+
+// Le compte de ce qu'il y a a lire, dans l'ordre des libelles de heroLedger :
+// notes publiees, fils, langues servies. Compte ici comme le reste, pour que
+// le hero n'ait aucune collection a relire.
+const ledger = [posts.length, topics.length, locales.length] as const;
+
+// Chaque bloc de la page peut etre masque dans le back office (champ "hidden") ;
+// en mode edition, un bloc masque reste visible, estompe, avec sa pastille.
+const voir = (slug: string): boolean => blocVisible(Astro, slug);
+
+// L'ordre des blocs : celui du theme, sauf pour un bloc a qui l'editeur a
+// donne une place dans le back office (champ "order" de "Textes des pages",
+// src/moteur/ordre-des-blocs.ts). Moteur eteint, l'ordre du theme, tel quel.
+//
+// L'ordre du theme a ses raisons. La bande defilante mord les deux bords juste
+// sous l'ouverture : c'est elle qui casse la largeur de panneau du premier
+// ecran et lance le rythme de la page ; elle porte les vrais sujets, pas des
+// mots decoratifs. La sequence filmee remplace le bloc "mot du studio" (le
+// composant StudioNote reste dans le theme pour qui prefere un bloc sans
+// video) et vient juste apres le billet a la une, pas en fin de page ou elle
+// avait ete posee d'abord : la, elle donnait trois blocs sombres a la suite
+// (la scene, le panneau d'abonnement, le pied) separes par une bande de 18 px
+// de fond de page, qui se lisaient comme un raccord rate. Au milieu, elle
+// coupe deux grilles de cartes, ce qu'une pleine largeur doit faire. Un
+// editeur qui deplace un bloc passe outre en connaissance de cause : le guide
+// le dit.
+const blocs = ordreDesBlocs(
+  ["hero", "bande-sujets", "a-la-une", "studio", "dernieres-notes", "sujets", "signatures", "lettre"] as const,
+  (slug) => donneesDe(Astro, slug),
+);
+// Le premier bloc que le visiteur voit.
+const premier = blocs.find((bloc) => voir(bloc));
+
+const title = t.home.metaTitle;
+const description = t.home.metaDescription;
+
+// Le nom et les reseaux du site : les reglages du back office, sinon siteData.
+const marque = identiteDuSite(Astro, locale);
+const base = Astro.site ?? Astro.url;
+const siteUrl = new URL(localizePath("/", locale), base).href;
+const schemas = [
+  organization({
+    name: marque.nom,
+    url: siteUrl,
+    // Le logo des reglages du site, sinon l'icone du theme (180 px, carree,
+    // fabriquee au build) : Google demande un logo d'au moins 112 px.
+    logo: new URL(marque.logo?.url ?? "/apple-touch-icon.png", siteUrl).href,
+    sameAs: marque.reseaux.length > 0 ? marque.reseaux.map((r) => r.url) : undefined,
+  }),
+  website({ name: marque.nom, url: siteUrl, description }),
+];
+---
+
+<BaseLayout {title} {description} image={imageDePartage(Astro, "hero")}>
+  <Fragment slot="head">
+    {
+      schemas.map((node) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(node)} />
+      ))
+    }
+  </Fragment>
+
+  <Navbar />
+
+  <main id="content">
+    {/* Chaque bloc a sa place (voir "blocs" plus haut) ; la place du theme :
+        l'ouverture, la bande des sujets, le billet a la une, la sequence
+        filmee, les notes recentes, les sujets, les signatures, la lettre. */}
+    {/* Un autre bloc que l'ouverture en tete (place choisie, ou ouverture
+        masquee) : une marge pour qu'il ne passe pas sous la barre flottante,
+        que l'ouverture prevoit seule. En style, pas en classe : la feuille du
+        theme ne change pas. */}
+    {premier !== undefined && premier !== "hero" && <div aria-hidden="true" style="height:3rem"></div>}
+    {
+      blocs.map((bloc) =>
+        bloc === "hero" ? (
+          voir("hero") && <Hero {ledger} />
+        ) : bloc === "bande-sujets" ? (
+          voir("bande-sujets") && <TopicMarquee {topics} counts={topicCounts} />
+        ) : bloc === "a-la-une" ? (
+          featured && voir("a-la-une") && <FeaturedPost entry={featured} />
+        ) : bloc === "studio" ? (
+          voir("studio") && <FilmScene />
+        ) : bloc === "dernieres-notes" ? (
+          latest.length > 0 && voir("dernieres-notes") && <LatestPosts posts={latest} />
+        ) : bloc === "sujets" ? (
+          voir("sujets") && <TopicStrip {topics} counts={topicCounts} />
+        ) : bloc === "signatures" ? (
+          voir("signatures") && <WritersStrip {authors} counts={authorCounts} />
+        ) : (
+          voir("lettre") && <NewsletterInvite />
+        ),
+      )
+    }
+  </main>
+
+  {/* La bande d'inscription de l'accueil porte deja l'ancre et le formulaire :
+      le pied de page n'en remet pas un second deux ecrans plus bas. */}
+  <Footer newsletter={false} />
+</BaseLayout>

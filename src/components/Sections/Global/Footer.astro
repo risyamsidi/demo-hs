@@ -1,0 +1,291 @@
+---
+// src/components/Sections/Global/Footer.astro - pied de page : marque, inscription a la lettre, trois colonnes de liens, selecteur de langue et mentions.
+//
+// Le pied de page de Reef reste sur le papier chaud du site au lieu de basculer
+// en aplat sombre comme celui d'Aloha. Un blog qui se termine par une grande
+// dalle noire annonce une page commerciale ; ici la page se ferme comme un ourlet.
+//
+// Les colonnes viennent de getFooterData : trois seulement, et chaque entree
+// mene a une page que le theme construit vraiment. Un pied de page de blog qui
+// aligne les six colonnes d'un SaaS finit en depot de liens morts.
+import { Icon, type IconName } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
+import { LocaleSwitcher } from "@components/ui/locale-switcher";
+import { getFooterData, getSiteRoutes } from "@config/navData.json.ts";
+import siteData from "@config/siteData.json";
+import { fmt, getLocale, localePrefix, useTranslations } from "@i18n";
+import { annotationsDe, enEdition, styleDuBloc } from "@moteur/annotations";
+import { blocVisible, marqueCadre, marqueInterface, menuDe } from "@moteur/cadre";
+import Pastilles from "@moteur/Pastilles.astro";
+import { envoiDeLaLettre } from "@moteur/courriels";
+import { COLONNES_DU_PIED, identiteDuSite } from "@moteur/theme";
+
+type Props = {
+  /**
+   * Faux quand la page porte deja sa propre bande d'inscription (l'accueil).
+   * Le pied de page lui cede alors le formulaire ET l'ancre #newsletter :
+   * deux formulaires identiques a deux ecrans d'ecart ne doublent pas les
+   * inscriptions, ils donnent l'impression d'une page recopiee.
+   */
+  newsletter?: boolean;
+};
+
+// La lettre peut etre masquee dans le back office (champ "hidden" de l'entree "lettre").
+const newsletter = (Astro.props as Props).newsletter !== false && blocVisible(Astro, "lettre");
+
+const locale = getLocale(Astro);
+const t = useTranslations(Astro);
+// Moteur allume, en mode edition : les sections "pied-de-page" et "lettre" de la base.
+const pied = annotationsDe(Astro, "pied-de-page");
+const lettre = annotationsDe(Astro, "lettre");
+const site = annotationsDe(Astro, "site");
+const edition = enEdition(Astro);
+const routes = getSiteRoutes(locale);
+// Moteur allume : le nom et le logo viennent des reglages du site, l'adresse
+// e-mail et le credit de l'entree "site" de la langue, chaque colonne d'un menu
+// du back office (son libelle est le titre de la colonne), et les phrases de
+// l'entree "pied-de-page". Le pied vient apres <main> : il porte ses
+// annotations normalement. Moteur eteint, tout vient des fichiers, comme avant.
+const marque = identiteDuSite(Astro, locale);
+const columns = getFooterData(locale).map((repli, rang) => {
+  const nom = COLONNES_DU_PIED[rang] ?? "";
+  const menu = menuDe(Astro, nom, locale);
+  return {
+    nom,
+    title: menu?.label ?? repli.title,
+    links: menu
+      ? menu.items.map((item): { text: string; href: string; target?: string } => ({ text: item.label, href: item.url, target: item.target }))
+      : repli.links.map((lien): { text: string; href: string; target?: string } => lien),
+  };
+});
+const cible = (target?: string) => (target ? { target, rel: target === "_blank" ? "noopener" : undefined } : {});
+// L'adresse du service qui recoit les inscriptions (entree "site") : vide, le
+// formulaire reste une demonstration sans action, comme les fichiers le livrent.
+// La lettre d'information du back office quand elle est branchee,
+// sinon l'adresse externe de l'entree "site", sinon rien (demonstration).
+const envoiDeLettre = newsletter ? await envoiDeLaLettre(Astro) : null;
+const envoiLettre = envoiDeLettre?.attributs ?? (marque.formulaires.newsletter ? { action: marque.formulaires.newsletter, method: "post" } : {});
+
+// L'annee est calculee au build : le theme n'embarque pas une date qui vieillit
+// dans un fichier de config.
+const year = new Date().getFullYear();
+
+// Rangee d'icones : uniquement le set maison, et chaque lien porte un nom
+// accessible, parce qu'une icone seule n'en a aucun. Les reseaux sont ceux
+// des reglages du site, dans leur ordre ; le jeu d'icones de la maison n'a pas
+// de logo de marque, donc une fleche sortante.
+const social: { label: string; href: string; icon: IconName; origine: string }[] = [
+  ...marque.reseaux.map(({ reseau, url }) => ({
+    label: fmt(t.footer.followOn, { name: marque.credit.nom, network: reseau }),
+    href: url,
+    icon: "arrow-up-right" as IconName,
+    origine: "reglages",
+  })),
+  { label: t.footer.emailStudio, href: `mailto:${marque.email}`, icon: "mail", origine: "site" },
+  { label: t.footer.subscribeRss, href: routes.rss, icon: "rss", origine: "" },
+];
+
+// Le titre de la lettre porte le mot d'accent : la decoupe se fait ici plutot
+// que d'ecrire un <span> dans chaque dictionnaire, ce qui obligerait un
+// traducteur a manipuler du HTML pour traduire une phrase.
+const title = t.newsletter.title;
+const accent = t.newsletter.accent;
+const at = title.toLowerCase().indexOf(accent.toLowerCase());
+const before = at >= 0 ? title.slice(0, at) : title;
+const word = at >= 0 ? title.slice(at, at + accent.length) : "";
+const after = at >= 0 ? title.slice(at + accent.length) : "";
+
+const creditHref = marque.credit.lien;
+
+// --- Ligne de demonstration ------------------------------------------------
+// Elle n'existe que si siteData.demoNotice est renseigne : l'utilisateur vide ce
+// champ et la ligne disparait. Le champ porte la cle i18n a afficher, et
+// toute autre valeur est prise telle quelle, pour qui prefere sa propre
+// phrase. Le texte lui-meme vit dans les dictionnaires, jamais ici.
+const noticeKey = siteData.demoNotice?.trim() ?? "";
+const demoNotice = noticeKey === "demo.notice" ? t.demo.notice : noticeKey;
+const [noticeBefore = "", noticeAfter = ""] = demoNotice.split("{studio}");
+// La boutique du theme, avec le prefixe de la langue courante : /fr/ en
+// francais, la racine en anglais. Jamais de domaine ecrit deux fois.
+const studioHref = "https://olanhomestay.com/";
+
+const columnLink =
+  "text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center text-[0.95rem] transition-colors duration-150";
+---
+
+<footer class="bg-surface border-border border-t" data-slot="footer" {...pied.entree}>
+  <div class="container-page py-16 md:py-20">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-10">
+      <div class="flex flex-col gap-6 lg:col-span-4">
+        <a href={routes.home} class="flex min-h-11 items-center gap-2" aria-label={t.nav.brandHome} {...marqueCadre(Astro, "reglages")}>
+          {
+            marque.logoSombre ? (
+              <>
+                {marque.logo ? (
+                  <img src={marque.logo.url} alt="" width={marque.logo.width} height={marque.logo.height} class="dark:hidden" style="height:1.6rem;width:auto" />
+                ) : (
+                  <Icon name="wave" size={22} class="text-primary dark:hidden" />
+                )}
+                <img src={marque.logoSombre.url} alt="" width={marque.logoSombre.width} height={marque.logoSombre.height} class="hidden dark:block" style="height:1.6rem;width:auto" />
+              </>
+            ) : marque.logo ? (
+              <img src={marque.logo.url} alt="" width={marque.logo.width} height={marque.logo.height} style="height:1.6rem;width:auto" />
+            ) : (
+              <Icon name="wave" size={22} class="text-primary" />
+            )
+          }
+          <span class="font-display text-xl font-semibold tracking-tight">{marque.nom}</span>
+        </a>
+        <p class="text-muted-foreground measure-prose text-[0.95rem] leading-relaxed" {...pied.champ("lede")}>
+          {t.footer.tagline}
+        </p>
+
+        {
+          newsletter && (
+            <section class="flex flex-col gap-3" id="newsletter" aria-labelledby="newsletter-title" {...lettre.entree} style={styleDuBloc(Astro, "lettre")}>
+              <Pastilles cle="lettre" masquable enLigne />
+              <h2 id="newsletter-title" class="font-display text-xl font-bold tracking-tight" {...lettre.champ("title")}>
+                {word ? (
+                  <Fragment>
+                    {before}
+                    <span class="accent-script" {...lettre.champ("accent")}>{word}</span>
+                    {after}
+                  </Fragment>
+                ) : (
+                  title
+                )}
+              </h2>
+              <p class="text-muted-foreground text-sm leading-relaxed" {...lettre.champ("lede")}>{t.newsletter.lede}</p>
+              {envoiDeLettre?.avis && (
+                <p id="lettre-avis" role="status" class="border-border bg-background rounded-card text-foreground flex items-start gap-2 border p-5 text-sm leading-relaxed">
+                  <Icon name={envoiDeLettre.avis.ton === "succes" ? "check-circle" : "info"} size={17} class="mt-0.5 shrink-0" />
+                  {envoiDeLettre.avis.texte}
+                </p>
+              )}
+              <form class="mt-1 flex flex-col gap-3 sm:flex-row" name="newsletter" {...envoiLettre}>
+                {envoiDeLettre && (
+                              <Fragment>
+                                <input type="hidden" name="retour" value={envoiDeLettre.caches.retour} />
+                                <input type="hidden" name="langue" value={envoiDeLettre.caches.langue} />
+                                <div class="sr-only" aria-hidden="true">
+                                  <input type="text" name={envoiDeLettre.caches.piege} tabindex="-1" autocomplete="off" />
+                                </div>
+                              </Fragment>
+                            )}
+                <label class="sr-only" for="footer-newsletter-email">
+                  {t.newsletter.emailLabel}
+                </label>
+                <Input
+                  id="footer-newsletter-email"
+                  class="sm:flex-1"
+                  type="email"
+                  name="email"
+                  placeholder={t.newsletter.placeholder}
+                  autocomplete="email"
+                  spellcheck="false"
+                  aria-describedby="footer-newsletter-note"
+                  required
+                />
+                <Button type="submit" variant="primary" class="sm:shrink-0" {...lettre.champ("cta")}>
+                  {t.newsletter.submit}
+                </Button>
+              </form>
+              <p id="footer-newsletter-note" class="text-muted-foreground text-xs" {...lettre.champ("note")}>
+                {t.newsletter.note}
+              </p>
+            </section>
+          )
+        }
+      </div>
+
+      <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8 lg:col-start-5">
+        {
+          columns.map((column) => (
+            <div class="flex flex-col gap-2" {...marqueCadre(Astro, `menu:${column.nom}`)}>
+              <h3 class="font-sans text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
+                {column.title}
+              </h3>
+              <ul class="flex flex-col">
+                {column.links.map((link) => (
+                  <li>
+                    <a href={link.href} class={columnLink} {...cible(link.target)}>
+                      {link.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div
+      class="border-border mt-14 flex flex-col gap-6 border-t pt-8 sm:flex-row sm:items-end sm:justify-between"
+    >
+      <div class="text-muted-foreground flex flex-col gap-1 text-sm">
+        {
+          edition ? (
+            <p>
+              &copy; {year} <span {...marqueCadre(Astro, "reglages")}>{marque.nom}</span>. <span {...pied.champ("note")}>{t.footer.rights}</span>
+            </p>
+          ) : (
+            <p>&copy; {year} {marque.nom}. {t.footer.rights}</p>
+          )
+        }
+        <p {...pied.champ("body")}>{t.footer.builtWith}</p>
+        {
+          !demoNotice && (
+            <p>
+              {edition ? <span {...pied.champ("cta")}>{t.footer.themeBy}</span> : t.footer.themeBy}{" "}
+              <a href={creditHref} class="text-foreground font-semibold hover:underline" {...site.champ("credit_name")}>
+                {marque.credit.nom}
+              </a>
+            </p>
+          )
+        }
+        {
+          demoNotice && (
+            <p {...marqueInterface(Astro)}>
+              {noticeBefore}
+              <a href={studioHref} class="text-foreground font-semibold hover:underline">
+                {t.demo.studio}
+              </a>
+              {noticeAfter}
+            </p>
+          )
+        }
+      </div>
+
+      <ul class="flex flex-wrap items-center gap-2">
+        <li class="mr-1">
+          <LocaleSwitcher variant="inline" />
+        </li>
+        {
+          social.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-label={item.label}
+                {...(item.origine ? marqueCadre(Astro, item.origine) : {})}
+                class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill grid size-11 place-items-center border transition-colors duration-150"
+              >
+                <Icon name={item.icon} size={17} />
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a
+            href="#content"
+            class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill inline-flex min-h-11 items-center gap-2 border px-4 text-sm transition-colors duration-150"
+          >
+            <Icon name="chevron-up" size={16} />
+            {edition ? <span {...pied.champ("cta_secondary")}>{t.footer.backToTop}</span> : t.footer.backToTop}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>

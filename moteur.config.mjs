@@ -1,0 +1,297 @@
+// moteur.config.mjs - le moteur de publication, debrayable : sans ALOHA_MOTEUR, Reef reste un site 100% statique.
+//
+// POURQUOI UN FICHIER A PART : astro.config.mjs decrit le theme, celui-ci
+// decrit le moteur. Qui n'achete que le theme ne lit jamais ce fichier, et
+// qui allume le moteur n'a qu'une variable a poser.
+//
+// Le moteur est EmDash (MIT, emdashcms.com) : la base D1 porte le contenu, R2
+// les medias, et les pages gerees se rendent a la demande. Publier dans le
+// back office ecrit en base, et la page suivante le montre : aucun build.
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { catalogueDuBackOffice } from "./src/moteur/catalogue-bo.config.mjs";
+import { IDENTITE as DEPLOYER } from "./src/moteur/deployer/identite.mjs";
+import { IDENTITE as CHAMPS } from "./src/moteur/champs/identite.mjs";
+import { capacites, IDENTITE as COURRIELS } from "./src/moteur/extensions/courriels/identite.mjs";
+import { CAPACITES as CAPACITES_GESTION, IDENTITE as GESTION } from "./src/moteur/extensions/gestion/identite.mjs";
+import { PAGES_EN_CACHE, PAGES_GEREES } from "./src/moteur/pages-gerees.mjs";
+import { routesDuCache } from "./src/moteur/routes-du-cache.mjs";
+import { CARTES as CARTES_ACCUEIL, IDENTITE as ACCUEIL } from "./src/moteur/accueil/identite.mjs";
+import { IDENTITE as MEDIAS } from "./src/moteur/medias/identite.mjs";
+import { IDENTITE as SEO, ROUTE_DE_L_INDEX, ROUTE_DU_PLAN } from "./src/moteur/seo/identite.mjs";
+import { IDENTITE as DESIGN } from "./src/moteur/design/identite.mjs";
+import { planFige } from "./src/moteur/seo/integration.mjs";
+
+const ici = (chemin) => fileURLToPath(new URL(chemin, import.meta.url));
+
+// Le nom affiche par le back office : celui de la marque de demonstration,
+// relu dans siteData.json.ts sans l'importer. Ce fichier est du TypeScript
+// avec des alias d'Astro, et la configuration tourne dans Node. L'acheteur qui
+// remplace le nom dans siteData remplace aussi celui-ci.
+const NOM_DU_SITE =
+  /name:\s*"([^"]+)"/.exec(readFileSync(ici("./src/config/siteData.json.ts"), "utf8"))?.[1] ?? "Reef";
+
+/** Vrai quand le moteur est allume. Lu au build ET par `astro dev`. */
+export const MOTEUR_ACTIF = process.env.ALOHA_MOTEUR === "emdash";
+
+// LES COURRIELS ONT-ILS LEUR LIAISON ? Lu dans le fichier du Worker, ligne
+// par ligne, commentaires ecartes : une entree "send_email" non commentee.
+// Sans elle, l'extension Courriels ne se declare pas fournisseur du canal
+// d'EmDash (src/moteur/extensions/courriels/extension.ts) : Reef s'installe
+// et tourne sans courriels, et le back office dit ce qui manque.
+const LIAISON_COURRIELS = readFileSync(ici("./wrangler.moteur.jsonc"), "utf8")
+  .split("\n")
+  .some((ligne) => /^\s*"send_email"\s*:/.test(ligne));
+
+// LES IMAGES DES PAGES RENDUES A LA DEMANDE.
+//
+// "compile" seul les laisserait sortir dans leur poids d'origine : sharp ne
+// tourne qu'au build, et une page rendue a la demande n'a pas de build : une
+// photo pesait vingt-cinq fois son poids optimise. Le liant Images de Cloudflare fait a la demande ce que sharp
+// fait au build ; il demande Cloudflare Images sur le compte.
+//
+// ALOHA_IMAGES=origine garde "compile" seul, pour qui n'a pas ce service : le
+// site marche, ses images gerees sont simplement plus lourdes.
+const IMAGES =
+  process.env.ALOHA_IMAGES === "origine" ? "compile" : { build: "compile", runtime: "cloudflare-binding" };
+
+// LE CACHE D'OBJETS. Aucun par defaut : les pages gerees lisent la base a
+// chaque requete, et une publication se voit en moins de 100 ms (docs/moteur.md).
+// Un site a fort trafic peut garder ces lectures :
+//   ALOHA_CACHE_OBJETS=kv       dans Cloudflare KV (liant "CACHE" a declarer dans wrangler.moteur.jsonc)
+//   ALOHA_CACHE_OBJETS=memoire  dans la memoire du processus (essais locaux)
+// EmDash l'invalide a chaque ecriture ; le bouton "Tout deployer" le vide en entier.
+const CACHE_OBJETS = ["kv", "memoire"].includes(process.env.ALOHA_CACHE_OBJETS ?? "")
+  ? process.env.ALOHA_CACHE_OBJETS
+  : null;
+
+// LE CACHE DE ROUTES. Aucun par defaut, pour la meme raison. Un site a fort
+// trafic peut garder ses pages gerees au bord du reseau :
+//   ALOHA_CACHE_ROUTES=cloudflare  dans Workers Cache (a activer aussi dans wrangler.moteur.jsonc, voir docs/moteur.md)
+//   ALOHA_CACHE_ROUTES=memoire     dans la memoire du processus (essais locaux : prouve la purge a la publication)
+// Chaque page geree declare alors sa duree et porte l'etiquette de ses
+// collections : a chaque publication, EmDash purge ces etiquettes, et la page
+// suivante est rendue a neuf. "Tout deployer" vide le tout.
+const CACHE_ROUTES = ["cloudflare", "memoire"].includes(process.env.ALOHA_CACHE_ROUTES ?? "")
+  ? process.env.ALOHA_CACHE_ROUTES
+  : null;
+
+/** Une page en cache sert au plus une minute de retard si une purge se perd ; au-dela, elle est rendue a neuf en arriere-plan. */
+const DUREE_DU_CACHE = { maxAge: 60, swr: 600 };
+
+// LA LANGUE DU BACK OFFICE. Le francais par defaut : Reef s'edite en
+// francais, et un libelle anglais dans le rail est un defaut. ALOHA_BO_LANGUE
+// reste le levier - ALOHA_BO_LANGUE=en rend le back office a l'anglais,
+// ALOHA_BO_LANGUE=navigateur le laisse suivre chaque navigateur, comme le
+// moteur le fait seul (28 langues). Dans tous les cas, chaque personne garde
+// le dernier mot dans ses reglages : ce qui est pose ici n'est qu'un defaut
+// (voir src/moteur/langue-bo.ts).
+//
+// Le catalogue francais d'EmDash 0.38 laisse 678 messages en anglais ; le
+// dictionnaire du theme les complete (voir src/moteur/catalogue-bo.ts).
+// ALOHA_BO_FUSEAU regle le fuseau des heures affichees par les extensions.
+const LANGUE_DEMANDEE = (process.env.ALOHA_BO_LANGUE ?? "").trim();
+const LANGUE_BO =
+  LANGUE_DEMANDEE === "navigateur"
+    ? null
+    : /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(LANGUE_DEMANDEE)
+      ? LANGUE_DEMANDEE
+      : "fr";
+const FUSEAU_BO = (process.env.ALOHA_BO_FUSEAU ?? "").trim() || "Europe/Paris";
+
+/** Les collections du schema (seed/seed.json) : ce sont les etiquettes qu'EmDash purge a chaque publication. */
+function collectionsDuSchema() {
+  const graine = JSON.parse(readFileSync(ici("./seed/seed.json"), "utf8"));
+  return (graine.collections ?? []).map((collection) => collection.slug);
+}
+
+/** Rend a la demande les pages gerees, fige toutes les autres, ajoute le plan de site et /version.json, habille le back office. */
+function partageDesPages() {
+  return {
+    name: "aloha:moteur-pages",
+    hooks: {
+      "astro:config:setup": ({ config, injectRoute, addMiddleware, updateConfig }) => {
+        // Le cache de routes ne vaut que pour les pages gerees, un motif par
+        // langue (voir routes-du-cache.mjs) : l'API et l'administration du
+        // moteur n'en recoivent aucun. Le plan de site des pages gerees change
+        // avec elles.
+        if (CACHE_ROUTES) {
+          const regle = { ...DUREE_DU_CACHE, tags: collectionsDuSchema() };
+          const { locales, defaultLocale } = config.i18n ?? { locales: [], defaultLocale: "" };
+          const langues = locales.map((l) => (typeof l === "string" ? l : l.path));
+          updateConfig({
+            routeRules: { ...routesDuCache(PAGES_EN_CACHE, langues, defaultLocale, regle), "/sitemap-moteur.xml": regle },
+          });
+        }
+        // Habille le back office aux jetons du theme (voir habillage.ts).
+        addMiddleware({ entrypoint: ici("./src/moteur/habillage.ts"), order: "post" });
+        // La langue par defaut du back office n'est plus posee par un
+        // middleware : src/worker.moteur.ts applique la regle du socle
+        // (langueDuBackOffice) avant Astro, comme Nalu.
+        // LE PLAN DU SITE VIVANT (extension seo du socle) : /sitemap-moteur.xml
+        // reunit les pages figees du build, le plan des pages gerees
+        // (src/moteur/plan-du-site.ts, repris par src/moteur/seo/site.ts) et
+        // les dates de la base ; l'index ne cite que lui. /sitemap-contenu.xml
+        // n'a plus de route : l'aiguillage du Worker le renvoie en 301.
+        injectRoute({ pattern: ROUTE_DU_PLAN, entrypoint: ici("./src/moteur/seo/sitemap-moteur.ts"), prerender: false });
+        // Toutes les pages indexables se rendent a la demande :
+        // l'integration sitemap n'a plus de page figee a inventorier et n'ecrit
+        // plus l'index. Il est servi ici (voir plan-du-site.index.ts).
+        injectRoute({ pattern: ROUTE_DE_L_INDEX, entrypoint: ici("./src/moteur/seo/sitemap-index.ts"), prerender: false });
+        injectRoute({ pattern: "/version.json", entrypoint: ici("./src/moteur/version.ts"), prerender: false });
+        // Le formulaire de contact poste ici quand les courriels sont
+        // branches (src/moteur/extensions/courriels/reception.ts).
+        injectRoute({ pattern: "/_emdash/courriels/envoyer", entrypoint: ici("./src/moteur/extensions/courriels/reception.ts"), prerender: false });
+        // La lettre d'information : inscription, confirmation et
+        // desinscription (src/moteur/extensions/courriels/inscription.ts).
+        injectRoute({ pattern: "/_emdash/courriels/lettre/[geste]", entrypoint: ici("./src/moteur/extensions/courriels/inscription.ts"), prerender: false });
+        // La carte de partage d'un billet : sa couverture de la mediatheque,
+        // recadree en JPEG 1200x630 (voir src/moteur/carte-du-billet.regles.ts).
+        injectRoute({ pattern: "/og/billet/[cle].jpg", entrypoint: ici("./src/moteur/carte-du-billet.ts"), prerender: false });
+        // Figees ICI, une fois par build : l'horodatage est la preuve que
+        // montre "Tout deployer" (il ne change que si un nouveau build est en
+        // ligne), et les caches declares sont ceux que le bouton a le droit
+        // de dire "vides". Le cache de routes se lit dans la configuration
+        // d'Astro elle-meme : qui en pose un n'a rien d'autre a declarer.
+        const { version } = JSON.parse(readFileSync(ici("./package.json"), "utf8"));
+        updateConfig({
+          vite: {
+            plugins: CATALOGUE_BO ? [CATALOGUE_BO.greffon] : [],
+            define: {
+              __ALOHA_VERSION__: JSON.stringify(version),
+              __ALOHA_CONSTRUIT__: JSON.stringify(new Date().toISOString()),
+              __ALOHA_CACHES__: JSON.stringify({ objets: CACHE_OBJETS, routes: config.cache?.provider?.name ?? null }),
+              __ALOHA_BO_LANGUE__: JSON.stringify(LANGUE_BO),
+              __ALOHA_BO_FUSEAU__: JSON.stringify(FUSEAU_BO),
+            },
+          },
+        });
+      },
+      "astro:route:setup": ({ route }) => {
+        if (!route.component.startsWith("src/pages/")) return;
+        route.prerender = !PAGES_GEREES.includes(route.component);
+      },
+    },
+  };
+}
+
+// Le catalogue francais du back office (piece du socle, voir en tete de
+// src/moteur/catalogue-bo.ts) : son alias entre dans `alias`, son greffon dans
+// `vite.plugins`, moteur allume seulement.
+const CATALOGUE_BO = MOTEUR_ACTIF ? catalogueDuBackOffice(import.meta.url) : null;
+
+/** Les alias de Vite, en tableau : c'est la forme que le greffon du catalogue attend. */
+const alias = (source) => [
+  { find: "@moteur/source", replacement: ici(`./src/moteur/source.${source}.ts`) },
+  { find: "@moteur/live", replacement: ici(`./src/moteur/live.${source}.ts`) },
+  { find: "@moteur/TexteRiche.astro", replacement: ici(`./src/moteur/TexteRiche.${source}.astro`) },
+  // Le texte riche des pages libres : le rendu d'EmDash moteur allume, rien
+  // moteur eteint (aucune page libre n'existe, et aucun paquet du moteur
+  // n'entre dans le build statique).
+  { find: "@moteur/texte-riche", replacement: ici(`./src/moteur/texte-riche.${source}.astro`) },
+  // Le cadre du site (reglages, entree "site", menus, pages libres) : lu dans
+  // la base moteur allume, vide moteur eteint (src/moteur/cadre.*.ts).
+  { find: "@moteur/cadre-base", replacement: ici(`./src/moteur/cadre.${source}.ts`) },
+  // Le formulaire de contact : aucun envoi moteur eteint, l'extension Courriels moteur allume.
+  { find: "@moteur/courriels", replacement: ici(`./src/moteur/extensions/courriels/formulaire.${source}.ts`) },
+  // LA QUALITE DES IMAGES RENDUES A LA DEMANDE. Le service d'image que
+  // l'adapter pose pour IMAGES ci-dessus ecrit des adresses /_image sans
+  // qualite, et le liant Cloudflare Images encode alors presque sans perte,
+  // plusieurs fois le poids du build statique. Le meme
+  // service, avec la qualite du build dans chaque adresse : voir
+  // src/moteur/service-image.ts.
+  ...(source === "emdash"
+    ? [{ find: /^@astrojs\/cloudflare\/image-service-workerd$/, replacement: ici("./src/moteur/service-image.ts") }]
+    : []),
+  ...(CATALOGUE_BO?.alias ?? []),
+];
+
+/** Le fournisseur du cache de routes (`cache` d'Astro), quand ALOHA_CACHE_ROUTES est posee ; rien sinon. Les regles se posent dans partageDesPages. */
+async function cacheDeRoutes() {
+  if (!CACHE_ROUTES) return {};
+  // "cloudflare" passe par src/moteur/cache-routes.ts : le fournisseur de
+  // l'adapter, dont une purge impossible ne casse pas une publication.
+  const provider =
+    CACHE_ROUTES === "cloudflare"
+      ? { name: "cloudflare", entrypoint: ici("./src/moteur/cache-routes.ts") }
+      : (await import("astro/config")).memoryCache();
+  return { cache: { provider } };
+}
+
+// Les paquets du moteur ne se chargent QUE moteur allume : un build statique
+// ne lit ni l'adapter Cloudflare ni EmDash, et n'en paie pas le demarrage.
+async function allume() {
+  const { default: cloudflare } = await import("@astrojs/cloudflare");
+  const { default: react } = await import("@astrojs/react");
+  const { d1, r2, kvCache } = await import("@emdash-cms/cloudflare");
+  const { default: emdash, memoryCache } = await import("emdash/astro");
+  const cacheObjets = { kv: () => kvCache({ binding: "CACHE" }), memoire: () => memoryCache() }[CACHE_OBJETS ?? ""];
+  return {
+    alias: alias("emdash"),
+    // L'index du plan de site est celui de l'extension seo (/sitemap-index.xml) : rien a declarer a l'integration sitemap.
+    plans: [],
+    config: {
+      // "server" est ce qu'EmDash attend pour ses propres routes ; le
+      // partage ci-dessus refige aussitot toutes les pages non gerees.
+      output: "server",
+      // Les routes du moteur (/_emdash/api/...) s'appellent sans barre
+      // finale, et "always" leur repondrait 404.
+      trailingSlash: "ignore",
+      adapter: cloudflare({ configPath: "./wrangler.moteur.jsonc", imageService: IMAGES }),
+      ...(await cacheDeRoutes()),
+    },
+    integrations: [
+      react(),
+      emdash({
+        database: d1({ binding: "DB" }),
+        storage: r2({ binding: "MEDIA" }),
+        // Le back office porte le nom du site (NOM_DU_SITE) et la marque du
+        // theme, pas ceux du moteur.
+        admin: { siteName: NOM_DU_SITE, logo: "/favicon.svg", favicon: "/favicon.svg" },
+        ...(cacheObjets ? { objectCache: cacheObjets() } : {}),
+        // "Tout deployer" : extension native rangee dans le depot. EmDash
+        // l'importe par son chemin et l'embarque dans le Worker au build.
+        // "Courriels" : reglages, journal, branchement et envoi par la liaison
+        // Cloudflare Email du Worker (src/moteur/extensions/courriels/).
+        plugins: [
+          { ...DEPLOYER, entrypoint: ici("./src/moteur/deployer/extension.ts") },
+          { ...COURRIELS, entrypoint: ici("./src/moteur/extensions/courriels/extension.ts"), options: { livrer: LIAISON_COURRIELS }, capabilities: capacites(LIAISON_COURRIELS) },
+          // "Gestion" : les listes du back office a cocher (messages du formulaire,
+          // abonnes de la lettre, journal des courriels), en React.
+          { ...GESTION, entrypoint: ici("./src/moteur/extensions/gestion/extension.ts"), adminEntry: ici("./src/moteur/extensions/gestion/admin/admin.tsx"), capabilities: CAPACITES_GESTION },
+          // Le champ "une entree choisie par son nom" (auteur et sujet d'un
+          // article) : une extension React, sans route ni base,
+          // dont le composant est importe par le paquet de l'administration.
+          { ...CHAMPS, entrypoint: ici("./src/moteur/champs/extension.ts"), adminEntry: ici("./src/moteur/champs/admin.ts") },
+          // Le tableau de bord en tuiles (extension administrable du socle) : une carte de l'accueil d'EmDash.
+          { ...ACCUEIL, entrypoint: ici("./src/moteur/accueil/extension.ts"), adminEntry: ici("./src/moteur/accueil/admin.ts"), adminWidgets: CARTES_ACCUEIL },
+          // L'ecran SEO du rail : robots.txt, llms.txt, l'etat du plan et l'audit des pages (extension seo du socle).
+          { ...SEO, entrypoint: ici("./src/moteur/seo/extension.ts"), adminEntry: ici("./src/moteur/seo/admin.tsx") },
+          // La page Design du rail : logo, couleur, police, tailles, coins, avec apercu (extension design du socle 2.0.0).
+          { ...DESIGN, entrypoint: ici("./src/moteur/design/extension.ts"), adminEntry: ici("./src/moteur/design/admin.tsx") },
+          // Les photos converties a l'envoi et la carte Photos du tableau de bord (extension medias du socle).
+          { ...MEDIAS, entrypoint: ici("./src/moteur/medias/extension.ts") },
+        ],
+      }),
+      partageDesPages(),
+      // Le manifeste des pages figees que relit /sitemap-moteur.xml.
+      planFige(),
+    ],
+  };
+}
+
+/**
+ * Ce qu'astro.config.mjs etale dans sa propre configuration. Le type est ecrit
+ * ici pour que `trailingSlash` reste le litteral "ignore" et non une chaine
+ * quelconque : astro.config.mjs est controle (@ts-check), et le refuserait.
+ *
+ * @type {{
+ *   alias: { find: string | RegExp, replacement: string }[],
+ *   plans: string[],
+ *   config: import("astro").AstroUserConfig,
+ *   integrations: import("astro").AstroIntegration[],
+ * }}
+ */
+export const moteur = MOTEUR_ACTIF
+  ? await allume()
+  : { alias: alias("fichiers"), plans: [], config: {}, integrations: [] };
