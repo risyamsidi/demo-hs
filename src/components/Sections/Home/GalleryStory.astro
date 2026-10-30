@@ -4,53 +4,66 @@ import SectionHeader from "@components/Sections/Global/SectionHeader.astro";
 import { getLocale } from "@i18n";
 import { annotationsDe, styleDuBloc } from "@moteur/annotations";
 import Pastilles from "@moteur/Pastilles.astro";
+import heroPreview from "@assets/reef-hero-vague.webp";
+import coverBudget from "@assets/covers/reef-budget-performance.webp";
+import coverCollections from "@assets/covers/reef-collections-contrat.webp";
+import coverScale from "@assets/covers/reef-echelle-typo.webp";
+import coverAges from "@assets/covers/reef-html-qui-vieillit.webp";
 
 const locale = getLocale(Astro);
 const ed = annotationsDe(Astro, "gallery-story");
 const isEn = locale === "en";
+
+const previewImages = [
+  heroPreview.src,
+  coverBudget.src,
+  coverCollections.src,
+  coverScale.src,
+  coverAges.src,
+];
 
 const spaces = isEn
   ? [
       {
         title: "Front view",
         note: "A warm welcome and a calm first impression.",
-        palette: "linear-gradient(135deg, #f0d9b8 0%, #d38557 42%, #304d4a 100%)",
+        image: previewImages[0],
         span: "md:col-span-7",
       },
       {
         title: "Living room",
         note: "Comfortable shared space for families and friends.",
-        palette: "linear-gradient(135deg, #d7e3dd 0%, #9db0a4 38%, #566a5d 100%)",
+        image: previewImages[1],
         span: "md:col-span-5",
       },
       {
         title: "TV room",
         note: "Relaxed evenings with a cozy atmosphere.",
-        palette: "linear-gradient(135deg, #ebdec0 0%, #d6a66c 40%, #5d3a2a 100%)",
+        image: previewImages[2],
         span: "md:col-span-5",
       },
       {
         title: "Bedroom 1",
         note: "Clean, restful, and ready for a good night sleep.",
-        palette: "linear-gradient(135deg, #e7efe9 0%, #c9d9cf 42%, #718a86 100%)",
+        image: previewImages[3],
         span: "md:col-span-7",
       },
       {
         title: "Bedroom 2",
         note: "Smart layout for couples and small families.",
-        palette: "linear-gradient(135deg, #f0ede5 0%, #d9d0c7 35%, #7a6d5e 100%)",
+        image: previewImages[4],
         span: "md:col-span-6",
       },
       {
         title: "Kids pool",
         note: "A playful corner for children to enjoy the weekend.",
-        palette: "linear-gradient(135deg, #cfe9f5 0%, #89c0d0 38%, #2d6077 100%)",
+        image: previewImages[0],
         span: "md:col-span-6",
       },
       {
         title: "Kitchen",
         note: "Practical space for simple daily comfort.",
-        palette: "linear-gradient(135deg, #f4e9dd 0%, #d7ba8b 36%, #7a5443 100%)",
+        image: previewImages[1],
         span: "md:col-span-12",
       },
     ]
@@ -58,43 +71,43 @@ const spaces = isEn
       {
         title: "Tampak depan",
         note: "Kesan ramah dan tenang di pintu masuk homestay.",
-        palette: "linear-gradient(135deg, #f0d9b8 0%, #d38557 42%, #304d4a 100%)",
+        image: previewImages[0],
         span: "md:col-span-7",
       },
       {
         title: "Ruang tamu",
         note: "Area santai untuk bersantai bersama keluarga.",
-        palette: "linear-gradient(135deg, #d7e3dd 0%, #9db0a4 38%, #566a5d 100%)",
+        image: previewImages[1],
         span: "md:col-span-5",
       },
       {
         title: "Ruang TV",
         note: "Suasana nyaman untuk malam santai di dalam rumah.",
-        palette: "linear-gradient(135deg, #ebdec0 0%, #d6a66c 40%, #5d3a2a 100%)",
+        image: previewImages[2],
         span: "md:col-span-5",
       },
       {
         title: "Kamar tidur 1",
         note: "Ruang tidur yang bersih, tenang, dan nyaman.",
-        palette: "linear-gradient(135deg, #e7efe9 0%, #c9d9cf 42%, #718a86 100%)",
+        image: previewImages[3],
         span: "md:col-span-7",
       },
       {
         title: "Kamar tidur 2",
         note: "Tata letak yang cocok untuk pasangan maupun keluarga kecil.",
-        palette: "linear-gradient(135deg, #f0ede5 0%, #d9d0c7 35%, #7a6d5e 100%)",
+        image: previewImages[4],
         span: "md:col-span-6",
       },
       {
         title: "Kolam renang anak",
         note: "Area bermain yang aman dan menyenangkan untuk anak.",
-        palette: "linear-gradient(135deg, #cfe9f5 0%, #89c0d0 38%, #2d6077 100%)",
+        image: previewImages[0],
         span: "md:col-span-6",
       },
       {
         title: "Dapur",
         note: "Fasilitas praktis untuk kenyamanan tinggal lebih lama.",
-        palette: "linear-gradient(135deg, #f4e9dd 0%, #d7ba8b 36%, #7a5443 100%)",
+        image: previewImages[1],
         span: "md:col-span-12",
       },
     ];
@@ -129,7 +142,7 @@ const spaces = isEn
         spaces.map((space) => (
           <article
             class={`${space.span} group relative min-h-[18rem] overflow-hidden rounded-card border border-border bg-card shadow-float`}
-            style={`background: ${space.palette};`}
+            style={`background-image: linear-gradient(180deg, rgba(15,23,42,0.14), rgba(15,23,42,0.72)), url("${space.image}"); background-size: cover; background-position: center;`}
           >
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-900/15 to-transparent" aria-hidden="true"></div>
             <div class="relative flex h-full min-h-[18rem] flex-col justify-end p-5 md:p-6">
