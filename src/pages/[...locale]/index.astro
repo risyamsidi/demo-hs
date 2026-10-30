@@ -11,6 +11,7 @@
 import CustomerReviews from "@components/Sections/Home/CustomerReviews.astro";
 import FaqAccordion from "@components/Sections/Home/FaqAccordion.astro";
 import Footer from "@components/Sections/Global/Footer.astro";
+import GalleryStory from "@components/Sections/Home/GalleryStory.astro";
 import Navbar from "@components/Sections/Global/Navbar.astro";
 import FeaturedPost from "@components/Sections/Home/FeaturedPost.astro";
 import FilmScene from "@components/Sections/Home/FilmScene.astro";
@@ -103,6 +104,7 @@ const blocs = ordreDesBlocs(
     "bande-sujets",
     "a-la-une",
     "studio",
+    "gallery-story",
     "dernieres-notes",
     "sujets",
     "signatures",
@@ -165,6 +167,8 @@ const schemas = [
           featured && voir("a-la-une") && <FeaturedPost entry={featured} />
         ) : bloc === "studio" ? (
           voir("studio") && <FilmScene />
+        ) : bloc === "gallery-story" ? (
+          voir("gallery-story") && <GalleryStory />
         ) : bloc === "dernieres-notes" ? (
           latest.length > 0 && voir("dernieres-notes") && <LatestPosts posts={latest} />
         ) : bloc === "sujets" ? (
