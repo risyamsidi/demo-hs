@@ -12,46 +12,56 @@ const isEn = locale === "en";
 const faqs = isEn
   ? [
       {
-        question: "What kind of projects is this website good for?",
+        question: "Is Olan Homestay suitable for families?",
         answer:
-          "It works well for personal brands, digital businesses, service businesses, product launches, and editorial content that needs both clarity and SEO performance.",
+          "Yes. Olan Homestay is designed for relaxed family stays, with comfortable rooms, practical facilities, and a calm atmosphere that makes it easy to unwind.",
       },
       {
-        question: "Can I still use it as a blog with a landing page home?",
+        question: "Is it a good choice for a weekend getaway?",
         answer:
-          "Yes. This homepage is designed to sit on top of a blog foundation, so you can keep your writing and also create a stronger landing experience for visitors.",
+          "Absolutely. It is ideal for short escapes, quiet rest, and enjoying a simple, comfortable stay without the stress of a crowded destination.",
       },
       {
-        question: "Is the homepage easy to customize without a developer?",
+        question: "Is there a pool area for children?",
         answer:
-          "The structure is component-based and easy to update. Most changes are content edits, not heavy rebuild work, especially for text, sections, and navigation.",
+          "Yes. The pool area is a family-friendly space where children can enjoy a comfortable and safe place to play while parents relax nearby.",
       },
       {
-        question: "Does the website stay fast and SEO friendly?",
+        question: "Is the location easy to reach?",
         answer:
-          "Yes. The project is built around static generation, clean semantics, metadata setup, and content structure that supports search engines and good page quality.",
+          "Yes. Olan Homestay is easy to access for quick family trips or peaceful weekend stays in the Lebak area.",
+      },
+      {
+        question: "Is the place clean and comfortable?",
+        answer:
+          "Yes. Cleanliness and comfort are a priority, so guests can enjoy a calm and restful experience from check-in to check-out.",
       },
     ]
   : [
       {
-        question: "Website ini cocok untuk jenis proyek apa?",
+        question: "Apakah Olan Homestay cocok untuk keluarga?",
         answer:
-          "Cocok untuk brand personal, bisnis digital, layanan, peluncuran produk, dan konten editorial yang membutuhkan kejelasan serta performa SEO yang baik.",
+          "Ya. Olan Homestay dirancang untuk menginap keluarga yang santai, dengan kamar nyaman, fasilitas yang praktis, dan suasana tenang yang membuat pengunjung lebih mudah bersantai.",
       },
       {
-        question: "Apakah tetap bisa dipakai sebagai blog sambil punya beranda landing page?",
+        question: "Apakah cocok untuk liburan akhir pekan?",
         answer:
-          "Bisa. Beranda ini dirancang di atas fondasi blog, jadi Anda tetap bisa menulis dan sekaligus memberi pengalaman landing page yang lebih kuat untuk pengunjung.",
+          "Sangat cocok. Tempat ini ideal untuk liburan singkat, beristirahat dengan tenang, dan menikmati menginap yang nyaman tanpa rasa terburu-buru.",
       },
       {
-        question: "Apakah halaman depan mudah disesuaikan tanpa developer?",
+        question: "Apakah ada area kolam untuk anak-anak?",
         answer:
-          "Ya. Struktur berbasis komponen membuat perubahan lebih mudah. Kebanyakan edit adalah konten, bukan pekerjaan besar yang memerlukan rekayasa ulang.",
+          "Ya. Area kolam dibuat untuk keluarga, sehingga anak-anak bisa bermain dengan aman dan nyaman sambil orang tua bersantai di dekatnya.",
       },
       {
-        question: "Apakah website tetap cepat dan ramah SEO?",
+        question: "Apakah lokasinya mudah dijangkau?",
         answer:
-          "Ya. Proyek ini dibangun dengan generasi statis, struktur semantik yang bersih, metadata yang rapi, dan susunan konten yang mendukung mesin pencari serta kualitas halaman.",
+          "Ya. Olan Homestay mudah dijangkau untuk perjalanan keluarga singkat maupun staycation akhir pekan di area Lebak.",
+      },
+      {
+        question: "Apakah tempat ini bersih dan nyaman?",
+        answer:
+          "Ya. Kebersihan dan kenyamanan menjadi prioritas, sehingga tamu bisa menikmati pengalaman menginap yang tenang dan menyenangkan.",
       },
     ];
 ---
@@ -71,12 +81,12 @@ const faqs = isEn
       edition={ed}
       headingId="faq-title"
       eyebrow={isEn ? "FAQ" : "Pertanyaan umum"}
-      title={isEn ? "Common questions" : "Pertanyaan yang sering muncul"}
-      accentWord={isEn ? "questions" : "sering"}
+      title={isEn ? "Frequently asked questions" : "Pertanyaan yang sering ditanya"}
+      accentWord={isEn ? "questions" : "ditanya"}
       lede={
         isEn
-          ? "Short answers to the most common questions before you decide how to shape the site."
-          : "Jawaban singkat untuk pertanyaan paling umum sebelum Anda memutuskan bagaimana membentuk situs ini."
+          ? "Everything you need to know before planning a calm and comfortable stay with us."
+          : "Semua yang perlu Anda ketahui sebelum merencanakan menginap yang tenang dan nyaman bersama kami."
       }
     />
 
