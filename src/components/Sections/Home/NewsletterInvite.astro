@@ -22,49 +22,43 @@
 // "site" ; sinon nulle part (DEMONSTRATION : build statique, rien ne part).
 import { Icon } from "@components/svg/icons";
 import { Button } from "@components/ui/button";
-import { Input } from "@components/ui/input";
 import { getSiteRoutes } from "@config/navData.json.ts";
-import { getLocale, useTranslations } from "@i18n";
+import { getLocale } from "@i18n";
 import { annotationsDe, styleDuBloc } from "@moteur/annotations";
 import { imageDe, lienDe } from "@moteur/cadre";
 import Pastilles from "@moteur/Pastilles.astro";
 import PhotoDuMoteur from "@moteur/PhotoDuMoteur.astro";
-import { envoiDeLaLettre } from "@moteur/courriels";
-import { identiteDuSite } from "@moteur/theme";
 import { Image } from "astro:assets";
 import heroVague from "../../../assets/reef-hero-vague.webp";
 
 const locale = getLocale(Astro);
-const t = useTranslations(Astro);
-// Moteur allume, en mode edition : les sections "lettre" et "lettre-flux" de la base.
+const isEn = locale === "en";
 const ed = annotationsDe(Astro, "lettre");
 const flux = annotationsDe(Astro, "lettre-flux");
 const routes = getSiteRoutes(locale);
-// Moteur allume : la photo de fond (champ image de l'entree "lettre"),
-// l'adresse du bouton du flux (cta_link de "lettre-flux") et l'adresse du
-// service qui recoit les inscriptions (entree "site"). Vide, le theme.
 const photo = imageDe(Astro, "lettre");
-const lienDuFlux = lienDe(Astro, "lettre-flux", "cta_link") ?? routes.rss;
-const envoi = identiteDuSite(Astro, locale).formulaires.newsletter;
-const envoiDeLettre = await envoiDeLaLettre(Astro);
-const attributsDuFormulaire = envoiDeLettre?.attributs ?? (envoi ? { action: envoi, method: "post" } : {});
+const bookingHref = lienDe(Astro, "lettre-flux", "cta_link") ?? routes.contact;
 
-const title = t.newsletter.title;
-const accent = t.newsletter.accent;
+const title = isEn ? "Your stay starts here" : "Liburan Anda dimulai di sini";
+const accent = isEn ? "stay" : "di sini";
 const at = title.toLowerCase().indexOf(accent.toLowerCase());
 const before = at >= 0 ? title.slice(0, at) : title;
 const word = at >= 0 ? title.slice(at, at + accent.length) : "";
 const after = at >= 0 ? title.slice(at + accent.length) : "";
+
+const primaryLabel = isEn ? "Check availability" : "Cek ketersediaan";
+const secondaryLabel = isEn ? "Plan your stay" : "Rencanakan menginap";
+const note = isEn
+  ? "Flexible check-in, a family-friendly stay, and a smooth welcome from the moment you arrive."
+  : "Check-in yang fleksibel, pengalaman menginap yang nyaman, dan sambutan hangat sejak kedatangan Anda.";
+const cardTitle = isEn ? "Plan your stay" : "Rencanakan menginap";
+const cardLede = isEn
+  ? "Choose your dates, confirm your room, and let us take care of the rest."
+  : "Pilih tanggal, konfirmasi kamar, dan biarkan kami mengurus sisanya.";
+const cardPrimary = isEn ? "Book now" : "Pesan sekarang";
+const cardSecondary = isEn ? "Ask a question" : "Tanya kami";
 ---
 
-{/* Le cadre est sur le MEME papier que le pied de page, et non sur le fond de
-    page. Mesure a l'origine de ce reglage : la fin de page enchainait quatre
-    encres en six cents pixels, la bande des signatures en papier, un filet de
-    fond de page, la scene sombre, un second filet de fond de page, puis le pied
-    en papier. Quatre changements de teinte que rien ne justifie se lisent comme
-    trois blocs mal raccordes, pas comme une composition. Sur un seul papier
-    continu, il ne reste qu'un objet sombre pose dedans, ce qui est exactement
-    ce que la section est. */}
 <div class="bg-surface p-2 sm:p-3 md:p-4" data-slot="newsletter-invite">
   <section
     class="deep-scene rounded-panel relative isolate overflow-hidden"
@@ -73,22 +67,6 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
     {...ed.entree}
     style={styleDuBloc(Astro, "lettre")}
   >
-    {/* La photographie, tout au fond. Ce bloc portait deux halos flous, un
-        corail en haut a gauche et un turquoise en bas a droite, qui derivaient
-        lentement. Ils donnaient a la fin de page un coin orange, et cette
-        temperature-la est exactement celle que le public associe aux pages
-        generees par une machine : le meme effet se retrouve sur des milliers
-        de sites, donc il ne dit plus rien de la maison.
-
-        C'est la photographie du premier ecran, recadree sur le bas. La section
-        se donnait deja pour mission de "refermer la page sur la scene qui l'a
-        ouverte" : elle le fait maintenant avec la scene elle-meme au lieu d'une
-        imitation en CSS. Un seul fichier pour les deux emplacements, donc rien
-        de plus a telecharger.
-
-        Decorative au sens strict, le titre dit deja ce que fait ce bandeau :
-        alt vide et aria-hidden. Chargee paresseusement, c'est le bas de la
-        page et personne ne l'attend. */}
     {
       photo ? (
         <PhotoDuMoteur
@@ -114,9 +92,6 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
     }
     <Pastilles cle="lettre" images={[{ champ: "image", sorte: "photo" }]} masquable />
 
-    {/* Le voile : dense a gauche, la ou le texte et le formulaire se posent,
-        ouvert a droite pour que la photo existe vraiment. Il bascule en
-        vertical sous 1024 px, quand le texte occupe toute la largeur. */}
     <div class="invite-veil pointer-events-none absolute inset-0 -z-20" aria-hidden="true"></div>
 
     <div class="container-page relative z-10 grid gap-12 py-16 md:py-24 lg:grid-cols-12 lg:gap-16">
@@ -135,72 +110,50 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
             )
           }
         </h2>
-        <p class="text-muted-foreground measure-wide text-lg leading-relaxed" {...ed.champ("lede")}>{t.newsletter.lede}</p>
+        <p class="text-muted-foreground measure-wide text-lg leading-relaxed" {...ed.champ("lede")}>
+          {isEn
+            ? "A calm, comfortable place to rest, reconnect, and enjoy the rhythm of the island."
+            : "Tempat yang tenang dan nyaman untuk beristirahat, reconnect, dan menikmati ritme pulau."}
+        </p>
 
-        {envoiDeLettre?.avis && (
-          <p id="lettre-avis" role="status" class="border-border bg-background rounded-card text-foreground flex items-start gap-2 border p-5 text-sm leading-relaxed">
-            <Icon name={envoiDeLettre.avis.ton === "succes" ? "check-circle" : "info"} size={17} class="mt-0.5 shrink-0" />
-            {envoiDeLettre.avis.texte}
-          </p>
-        )}
-        <form class="mt-2 flex flex-col gap-3 sm:max-w-xl sm:flex-row" name="newsletter-home" {...attributsDuFormulaire}>
-          {envoiDeLettre && (
-            <Fragment>
-              <input type="hidden" name="retour" value={envoiDeLettre.caches.retour} />
-              <input type="hidden" name="langue" value={envoiDeLettre.caches.langue} />
-              <div class="sr-only" aria-hidden="true">
-                <input type="text" name={envoiDeLettre.caches.piege} tabindex="-1" autocomplete="off" />
-              </div>
-            </Fragment>
-          )}
-          <label class="sr-only" for="home-newsletter-email">{t.newsletter.emailLabel}</label>
-          <Input
-            id="home-newsletter-email"
-            class="sm:flex-1"
-            type="email"
-            name="email"
-            size="lg"
-            placeholder={t.newsletter.placeholder}
-            autocomplete="email"
-            spellcheck="false"
-            aria-describedby="home-newsletter-note"
-            required
-          />
-          <Button type="submit" variant="primary" size="lg" class="sm:shrink-0" {...ed.champ("cta")}>
-            {t.newsletter.submit}
+        <div class="mt-2 flex flex-col gap-3 sm:max-w-xl sm:flex-row">
+          <Button href={bookingHref} variant="primary" size="lg" {...ed.champ("cta")}>
+            {primaryLabel}
+            <Icon name="arrow-right" size={17} />
           </Button>
-        </form>
-        <p id="home-newsletter-note" class="text-muted-foreground text-sm" {...ed.champ("note")}>{t.newsletter.note}</p>
+          <Button href={routes.contact} variant="outline" size="lg">
+            {secondaryLabel}
+          </Button>
+        </div>
+
+        <p id="home-newsletter-note" class="text-muted-foreground text-sm" {...ed.champ("note")}>
+          {note}
+        </p>
       </div>
 
-      {/* Le flux vit dans un panneau de verre et non dans une carte opaque : sur
-          une scene, une carte pleine fait un trou, le verre laisse passer le
-          halo et reste une couche au-dessus. Son bouton est en contour et non
-          plein, parce qu'un ecran n'a qu'un seul point d'action et que c'est le
-          champ d'inscription. */}
       <aside class="glass rounded-card flex flex-col gap-3 p-7 lg:col-span-5" {...flux.entree}>
-        <span class="text-accent-text" aria-hidden="true"><Icon name="rss" size={22} /></span>
-        <h3 class="font-display text-xl font-bold tracking-tight" {...flux.champ("title")}>{t.newsletter.rssTitle}</h3>
-        <p class="text-muted-foreground text-[0.95rem] leading-relaxed" {...flux.champ("lede")}>{t.newsletter.rssLede}</p>
-        <Pastilles cle="lettre-flux" liens={[["cta_link", routes.rss]]} enLigne />
-        <Button href={lienDuFlux} variant="outline" size="md" class="mt-auto self-start" {...flux.champ("cta")}>
-          {t.newsletter.rssCta}
-          <Icon name="arrow-up-right" size={17} />
-        </Button>
+        <span class="text-accent-text" aria-hidden="true"><Icon name="arrow-up-right" size={22} /></span>
+        <h3 class="font-display text-xl font-bold tracking-tight" {...flux.champ("title")}>
+          {cardTitle}
+        </h3>
+        <p class="text-muted-foreground text-[0.95rem] leading-relaxed" {...flux.champ("lede")}>
+          {cardLede}
+        </p>
+        <Pastilles cle="lettre-flux" liens={[["cta_link", bookingHref]]} enLigne />
+        <div class="mt-auto flex flex-col gap-3 sm:flex-row lg:flex-col">
+          <Button href={bookingHref} variant="primary" size="md" class="self-start" {...flux.champ("cta")}>
+            {cardPrimary}
+          </Button>
+          <Button href={routes.contact} variant="outline" size="md" class="self-start">
+            {cardSecondary}
+          </Button>
+        </div>
       </aside>
     </div>
   </section>
 </div>
 
 <style>
-  /* Le voile du bandeau d'invitation.
-
-     La couleur est lue sur --reef-background, que .deep-scene force a l'encre
-     juste au-dessus. Passer par var(--color-background) donnerait la valeur
-     calculee sur :root, c'est-a-dire le papier, et repeindrait la photo.
-
-     Les paliers sont denses : la photographie est claire a gauche, et un
-     formulaire blanc sur une ecume blanche ne se lit pas. */
   .invite-veil {
     background: linear-gradient(
       90deg,
@@ -210,9 +163,6 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
     );
   }
 
-  /* Sous 1024 px le texte occupe toute la largeur et tombe donc sur la partie
-     ouverte du degrade. Sur une image claire, le texte blanc n'est plus
-     lisible : le voile devient vertical. */
   @media (max-width: 63.99rem) {
     .invite-veil {
       background: linear-gradient(
