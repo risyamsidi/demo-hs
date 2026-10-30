@@ -1,0 +1,101 @@
+---
+// src/components/Sections/Home/FaqAccordion.astro - FAQ de la page d'accueil avec accordions natives et accessibles.
+import SectionHeader from "@components/Sections/Global/SectionHeader.astro";
+import { getLocale } from "@i18n";
+import { annotationsDe, styleDuBloc } from "@moteur/annotations";
+import Pastilles from "@moteur/Pastilles.astro";
+
+const locale = getLocale(Astro);
+const ed = annotationsDe(Astro, "faq");
+const isEn = locale === "en";
+
+const faqs = isEn
+  ? [
+      {
+        question: "What kind of projects is this website good for?",
+        answer:
+          "It works well for personal brands, digital businesses, service businesses, product launches, and editorial content that needs both clarity and SEO performance.",
+      },
+      {
+        question: "Can I still use it as a blog with a landing page home?",
+        answer:
+          "Yes. This homepage is designed to sit on top of a blog foundation, so you can keep your writing and also create a stronger landing experience for visitors.",
+      },
+      {
+        question: "Is the homepage easy to customize without a developer?",
+        answer:
+          "The structure is component-based and easy to update. Most changes are content edits, not heavy rebuild work, especially for text, sections, and navigation.",
+      },
+      {
+        question: "Does the website stay fast and SEO friendly?",
+        answer:
+          "Yes. The project is built around static generation, clean semantics, metadata setup, and content structure that supports search engines and good page quality.",
+      },
+    ]
+  : [
+      {
+        question: "Website ini cocok untuk jenis proyek apa?",
+        answer:
+          "Cocok untuk brand personal, bisnis digital, layanan, peluncuran produk, dan konten editorial yang membutuhkan kejelasan serta performa SEO yang baik.",
+      },
+      {
+        question: "Apakah tetap bisa dipakai sebagai blog sambil punya beranda landing page?",
+        answer:
+          "Bisa. Beranda ini dirancang di atas fondasi blog, jadi Anda tetap bisa menulis dan sekaligus memberi pengalaman landing page yang lebih kuat untuk pengunjung.",
+      },
+      {
+        question: "Apakah halaman depan mudah disesuaikan tanpa developer?",
+        answer:
+          "Ya. Struktur berbasis komponen membuat perubahan lebih mudah. Kebanyakan edit adalah konten, bukan pekerjaan besar yang memerlukan rekayasa ulang.",
+      },
+      {
+        question: "Apakah website tetap cepat dan ramah SEO?",
+        answer:
+          "Ya. Proyek ini dibangun dengan generasi statis, struktur semantik yang bersih, metadata yang rapi, dan susunan konten yang mendukung mesin pencari serta kualitas halaman.",
+      },
+    ];
+---
+
+<section
+  class="bg-surface border-border border-t"
+  aria-labelledby="faq-title"
+  data-slot="faq"
+  {...ed.entree}
+  style={styleDuBloc(Astro, "faq")}
+>
+  <Pastilles cle="faq" masquable />
+
+  <div class="container-page py-16 md:py-24">
+    <SectionHeader
+      as="h2"
+      edition={ed}
+      headingId="faq-title"
+      eyebrow={isEn ? "FAQ" : "Pertanyaan umum"}
+      title={isEn ? "Common questions" : "Pertanyaan yang sering muncul"}
+      accentWord={isEn ? "questions" : "sering"}
+      lede={
+        isEn
+          ? "Short answers to the most common questions before you decide how to shape the site."
+          : "Jawaban singkat untuk pertanyaan paling umum sebelum Anda memutuskan bagaimana membentuk situs ini."
+      }
+    />
+
+    <div class="mt-10 space-y-4">
+      {
+        faqs.map((item, index) => (
+          <details class="bg-card border-border group rounded-card border" open={index === 0}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-left md:px-6 md:py-5">
+              <span class="text-foreground text-base font-medium md:text-lg">{item.question}</span>
+              <span class="text-muted-foreground text-2xl leading-none transition-transform duration-200 group-open:rotate-45" aria-hidden="true">
+                +
+              </span>
+            </summary>
+            <div class="text-muted-foreground border-border border-t px-5 py-4 text-[0.97rem] leading-relaxed md:px-6 md:py-5">
+              {item.answer}
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
