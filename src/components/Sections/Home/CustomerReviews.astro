@@ -1,0 +1,104 @@
+---
+// src/components/Sections/Home/CustomerReviews.astro - avis clients et temoignages avec etoiles sur l'accueil.
+import SectionHeader from "@components/Sections/Global/SectionHeader.astro";
+import { getLocale } from "@i18n";
+import { annotationsDe, styleDuBloc } from "@moteur/annotations";
+import Pastilles from "@moteur/Pastilles.astro";
+
+const locale = getLocale(Astro);
+const ed = annotationsDe(Astro, "customer-reviews");
+const isEn = locale === "en";
+
+const reviews = isEn
+  ? [
+      {
+        name: "Maya R.",
+        role: "Marketing Lead",
+        quote:
+          "The process felt clear, fast, and thoughtful from day one. Our launch page now converts better and reads with far more confidence.",
+      },
+      {
+        name: "Daniel K.",
+        role: "Founder",
+        quote:
+          "We needed a stronger digital presence without losing clarity. This homepage gave us structure, trust, and a better story for our services.",
+      },
+      {
+        name: "Sofia T.",
+        role: "Operations Director",
+        quote:
+          "It is rare to find a design system that looks premium and still stays easy to edit. The team could update content without friction.",
+      },
+    ]
+  : [
+      {
+        name: "Maya R.",
+        role: "Marketing Lead",
+        quote:
+          "Prosesnya jelas, cepat, dan terasa matang sejak hari pertama. Halaman peluncuran kami sekarang lebih mudah dikonversi dan lebih meyakinkan.",
+      },
+      {
+        name: "Daniel K.",
+        role: "Founder",
+        quote:
+          "Kami butuh kehadiran digital yang lebih kuat tanpa kehilangan kejelasan. Beranda ini memberi kami struktur, kepercayaan, dan cerita yang lebih baik untuk layanan kami.",
+      },
+      {
+        name: "Sofia T.",
+        role: "Operations Director",
+        quote:
+          "Jarang ada sistem desain yang terlihat premium tapi tetap mudah diubah. Tim kami bisa memperbarui konten tanpa hambatan.",
+      },
+    ];
+
+const stars = Array.from({ length: 5 });
+---
+
+<section
+  class="bg-surface border-border border-t"
+  aria-labelledby="customer-reviews-title"
+  data-slot="customer-reviews"
+  {...ed.entree}
+  style={styleDuBloc(Astro, "customer-reviews")}
+>
+  <Pastilles cle="customer-reviews" masquable />
+
+  <div class="container-page py-16 md:py-24">
+    <SectionHeader
+      as="h2"
+      edition={ed}
+      headingId="customer-reviews-title"
+      eyebrow={isEn ? "Testimonials" : "Testimoni"}
+      title={isEn ? "Customer stories" : "Cerita pelanggan"}
+      accentWord={isEn ? "stories" : "pelanggan"}
+      lede={
+        isEn
+          ? "People remember the clarity of the message and the confidence of the experience. Here is what clients say after launch."
+          : "Orang ingat kejelasan pesan dan rasa percaya pada pengalaman yang mereka dapatkan. Inilah yang klien katakan setelah peluncuran."
+      }
+    />
+
+    <div class="mt-10 grid gap-6 md:grid-cols-3">
+      {
+        reviews.map((review) => (
+          <figure class="bg-card border-border flex h-full flex-col rounded-card border p-6 shadow-float">
+            <div class="mb-4 flex items-center gap-1 text-primary" aria-label={`${isEn ? "5 out of 5 stars" : "5 dari 5 bintang"}`}>
+              {stars.map(() => (
+                <span aria-hidden="true" class="text-lg">★</span>
+              ))}
+            </div>
+
+            <blockquote class="text-foreground mt-2 text-lg leading-relaxed">
+              “{review.quote}”
+            </blockquote>
+
+            <figcaption class="mt-6 border-border border-t pt-4">
+              <div class="font-display text-foreground text-base font-semibold">{review.name}</div>
+              <div class="text-muted-foreground text-sm">{review.role}</div>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
