@@ -1,5 +1,3 @@
-// src/i18n/ui/id/reading.ts - kamus Indonesia, bagian "reading" : yang mengelilingi artikel.
-
 export const idReading = {
   post: {
     minRead: "{n} menit dibaca",
@@ -37,13 +35,13 @@ export const idReading = {
   archive: {
     metaTitle: "Semua artikel",
     metaDescription:
-      "Setiap artikel yang dipublikasikan di Reef Notes, terbaru dulu: catatan build, kerja performa, tipografi, dan bisnis studio kecil.",
+      "Setiap artikel yang dipublikasikan di Olan Homestay, terbaru dulu: pengalaman stay, kenyamanan keluarga, dan momen tenang di Lebak.",
     crumb: "Semua artikel",
     eyebrow: "Arsip",
     title: "Semua yang telah kami tulis",
     accent: "Semua",
     lede:
-      "Arsip lengkap, terbaru dulu. Tiga puluh detik scroll lebih baik daripada kotak pencarian saat Anda belum tahu apa yang dicari.",
+      "Arsip lengkap, terbaru dulu. Tiga puluh detik scroll lebih baik daripada kotak pencarian saat kamu belum tahu apa yang dicari.",
     pageSuffix: "halaman {n}",
     listLabel: "Daftar artikel",
     paginationLabel: "Paginasi artikel",
@@ -62,8 +60,8 @@ export const idReading = {
     title: "Satu email, sekali sebulan",
     accent: "sekali",
     lede:
-      "Ringkasan singkat tentang apa yang kami terbitkan dan apa yang salah. Tanpa tracking pixel, tanpa urutan drip, dan satu klik untuk berhenti selamanya.",
-    emailLabel: "Email Anda",
+      "Ringkasan singkat tentang apa yang kami terbitkan dan apa yang kami perbaiki. Tanpa tracking pixel, tanpa urutan drip, dan satu klik untuk berhenti selamanya.",
+    emailLabel: "Email kamu",
     placeholder: "anda@example.com",
     submit: "Langganan",
     note: "Satu email sebulan. Batalkan kapan saja.",
