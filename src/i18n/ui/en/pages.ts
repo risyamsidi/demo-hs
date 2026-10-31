@@ -2,7 +2,7 @@
 //
 // Une page est un assemblage de sections, jamais un endroit ou l'on ecrit des
 // phrases : les titres de hero, les descriptions meta et les libelles de
-// formulaire vivent ici, et les composants n'affichent que ce qu'on leur passe.
+// formulaire vivent ici, et les composants n'affichent que ce qu'on leur passent.
 //
 // Le blog de demonstration s'appelle Reef Notes : le carnet d'un studio web
 // independant. Le registre est celui d'un artisan qui montre son etabli, pas
@@ -57,174 +57,174 @@ export const enPages = {
 
   // --- A propos ------------------------------------------------------------
   about: {
-    metaTitle: "About the studio",
+    metaTitle: "About Olan Homestay",
     metaDescription:
-      "Who runs Reef Notes, how the studio works, what we take on and what we turn down, and why the working notes are published instead of filed away.",
+      "A calm family homestay in Lebak with comfortable rooms, a welcoming atmosphere, and an easy stay for your next getaway.",
     /** Le nom de la page dans le fil d'Ariane et son balisage : court, distinct du titre donne aux moteurs de recherche. */
-    crumb: "About the studio",
+    crumb: "About",
     eyebrow: "About",
-    title: "A three-person studio that writes things down",
-    accent: "writes",
+    title: "A warm place to rest in Lebak",
+    accent: "warmth",
     lede:
-      "We design and build websites for small teams. Reef Notes is where the working notes end up, because the useful part of a project is almost never the screenshot.",
-    storyTitle: "How the notebook started",
-    storyAccent: "notebook",
+      "Olan Homestay is designed for family trips, relaxed weekends, and easy stays in a quiet and comfortable setting.",
+    storyTitle: "How it feels to stay here",
+    storyAccent: "feels",
     storyParagraphs: [
-      "The studio opened in 2019 with one laptop and a spreadsheet of leads. The first year taught us that a website is rarely a design problem: it is a decision problem with a design attached. Wh[...]",
-      "For three years the answers lived in a private repository. Every time a client asked why a page felt slow, or why we refused to add a fifth typeface, the reasoning was already written down.[...]",
-      "Reef Notes is that repository, cleaned up. Some entries are build logs with numbers in them, some are arguments about type, some cover the unglamorous half of freelancing: scoping, quoting,[...]",
+      "We wanted to create a place that feels warm, practical, and easy for families who want comfort without extra hassle.",
+      "From room layout to shared spaces, every detail is designed to make your stay simple, calm, and comfortable.",
+      "The goal is not luxury for its own sake, but a place where guests can slow down and enjoy a peaceful break.",
     ],
-    valuesTitle: "How we work",
-    valuesAccent: "work",
-    valuesLede: "Three rules we have not yet found a good reason to break.",
+    valuesTitle: "What guests value most",
+    valuesAccent: "value",
+    valuesLede: "Comfort, calm, and ease are the priorities for every stay.",
     values: [
       {
-        title: "Measure before arguing",
-        text: "Taste settles nothing about performance. We publish the before and after numbers, including the times a change made things worse.",
+        title: "Clean and comfortable",
+        text: "Rooms are prepared for rest and designed to feel simple, reliable, and welcoming.",
       },
       {
-        title: "Ship the boring version",
-        text: "The boring version launches on time, survives a redesign and still works with JavaScript off. Cleverness is what we add once the boring version is live.",
+        title: "Family friendly",
+        text: "Shared spaces, practical layouts, and easy access make family stays more comfortable.",
       },
       {
-        title: "Write it down once",
-        text: "If an answer takes more than five minutes to explain, it becomes a post. Clients get the link, we get our afternoon back.",
+        title: "Easy to enjoy",
+        text: "A quiet setting and thoughtful details make even short stays feel like a proper reset.",
       },
     ],
-    writersTitle: "The three of us",
-    writersAccent: "three",
-    writersLede: "Short bios, honest job titles, and every post each of us has signed.",
-    writersCta: "All authors",
-    contactTitle: "Working together",
+    writersTitle: "The hospitality behind the stay",
+    writersAccent: "hospitality",
+    writersLede: "Warm, simple attention is what guests remember most.",
+    writersCta: "Meet the hosts",
+    contactTitle: "Planning your stay",
     contactLede:
-      "We take on three or four projects a year, mostly redesigns for teams of under twenty people. If the timing lines up, tell us what is in the way.",
-    contactCta: "Get in touch",
+      "If you want to ask about room availability, family needs, or weekend plans, we would be happy to help.",
+    contactCta: "Contact us",
   },
 
   // --- Contact -------------------------------------------------------------
   // Le formulaire est complet et non monte : le theme ne choisit pas de
   // prestataire d'envoi a la place de son utilisateur. La copie, elle, est prete.
   contact: {
-    metaTitle: "Contact",
+    metaTitle: "Contact Olan Homestay",
     metaDescription:
-      "Project enquiries, a correction on a post, or a question about something we published. One inbox, read by a person, answered within two working days.",
+      "Ask about room availability, family stays, and the best time to visit Olan Homestay in Lebak.",
     /** Le nom de la page dans le fil d'Ariane et son balisage : court, distinct du titre donne aux moteurs de recherche. */
     crumb: "Contact",
     eyebrow: "Contact",
-    title: "Write to us, we read all of it",
-    accent: "all",
+    title: "Ask about your stay",
+    accent: "stay",
     lede:
-      "A project, a correction, a question about a build: it lands in the same inbox and a person answers it. No ticket number, no autoresponder.",
+      "We are happy to answer questions about room availability, family spaces, and weekend plans.",
     formTitle: "Send a message",
     nameLabel: "Your name",
-    namePlaceholder: "Ada Lovelace",
+    namePlaceholder: "Your name",
     emailLabel: "Email",
     emailPlaceholder: "you@example.com",
     subjectLabel: "Subject",
-    subjectPlaceholder: "One line is enough",
+    subjectPlaceholder: "Room availability",
     messageLabel: "Message",
-    messagePlaceholder: "What are you working on, and what is in the way?",
+    messagePlaceholder: "Tell us your dates and needs.",
     submit: "Send message",
-    formNote: "No newsletter signup hidden in this form. Your address is used to reply, and for nothing else.",
-    success: "Message sent. You will hear back within two working days.",
-    error: "That did not go through. Email us directly and we will pick it up there.",
+    formNote: "We reply as soon as possible and only use your message to help with your stay.",
+    success: "Your message has been sent. We will contact you soon.",
+    error: "Your message did not go through. Please try again or contact us directly.",
     directTitle: "Or skip the form",
-    directLede: "Plain email works just as well, and a thread is easier to keep than a form.",
-    directCta: "Email the studio",
+    directLede: "You can also contact us directly for room availability and family stay questions.",
+    directCta: "Contact us",
     nextTitle: "What happens next",
     nextSteps: [
-      "A short reply within two working days, written by one of us.",
-      "If it is a project, three questions come back before any number does.",
-      "If it is a correction, the post is fixed and credited the same week.",
+      "We reply with room availability and the best option for your stay.",
+      "If needed, we confirm room setup and family needs.",
+      "We help make your check-in simple and comfortable.",
     ],
   },
 
   // --- Sujets --------------------------------------------------------------
   topics: {
-    metaTitle: "Topics",
+    metaTitle: "Stay experiences",
     metaDescription:
-      "Every subject covered on Reef Notes: front-end craft, performance work, typography, and the business of running a small studio.",
+      "Explore family spaces, comfort details, and the calm atmosphere at Olan Homestay.",
     /** Le nom de la page dans le fil d'Ariane et son balisage : court, distinct du titre donne aux moteurs de recherche. */
-    crumb: "Topics",
+    crumb: "Stay experiences",
     /** Le surtitre de la page d'un sujet, distinct de celui de la liste des sujets. */
-    pageEyebrow: "Topics",
-    eyebrow: "Topics",
-    title: "Five threads we keep pulling",
-    accent: "threads",
+    pageEyebrow: "Stay",
+    eyebrow: "Stay",
+    title: "What makes a stay feel easy",
+    accent: "easy",
     lede:
-      "Every post belongs to exactly one topic. Pick a thread and read it end to end, oldest first if you want the argument in order.",
+      "Every detail is designed to support comfort, family ease, and a calmer kind of weekend break.",
     /** {count} vient du nombre d'articles publies dans le sujet. */
-    countLabel: "{count} posts",
-    countOne: "1 post",
-    readTopic: "Read this topic",
-    allTopics: "All topics",
-    emptyTitle: "Nothing filed here yet",
-    emptyLede: "The topic is open and the first post is still a draft. The RSS feed will say when it lands.",
+    countLabel: "{count} highlights",
+    countOne: "1 highlight",
+    readTopic: "Explore this topic",
+    allTopics: "All highlights",
+    emptyTitle: "Nothing is shown yet",
+    emptyLede: "New stay details will appear here when ready.",
   },
 
   // --- Auteurs -------------------------------------------------------------
   authors: {
-    metaTitle: "Authors",
+    metaTitle: "Meet the hosts",
     metaDescription:
-      "The people who write Reef Notes: what they work on day to day, where to find them elsewhere, and everything they have published here.",
+      "Get to know the people behind Olan Homestay and the experience they create for every guest.",
     /** Le nom de la page dans le fil d'Ariane et son balisage : court, distinct du titre donne aux moteurs de recherche. */
-    crumb: "Authors",
-    eyebrow: "Authors",
-    title: "Who writes here",
-    accent: "writes",
+    crumb: "Hosts",
+    eyebrow: "Hosts",
+    title: "Meet the hosts",
+    accent: "hosts",
     lede:
-      "Three people share this notebook. Every post carries a byline, and every byline leads to everything that person has written.",
+      "A small team that cares helps keep every stay warm, comfortable, and welcoming for each guest.",
     roleLabel: "Role",
-    linksLabel: "Elsewhere",
-    postsBy: "Posts by {name}",
-    readAll: "Read everything by {name}",
-    countLabel: "{count} posts",
-    countOne: "1 post",
-    emptyTitle: "No posts under this byline yet",
-    emptyLede: "An author page with nothing on it means a first draft is open somewhere. It happens.",
+    linksLabel: "More",
+    postsBy: "By {name}",
+    readAll: "Read more by {name}",
+    countLabel: "{count} stays",
+    countOne: "1 stay",
+    emptyTitle: "No details yet",
+    emptyLede: "This section will be filled as more stay experiences are added.",
   },
 
   // --- Recherche -----------------------------------------------------------
   // La recherche tourne dans le navigateur sur un index construit au build :
   // zero requete, zero service tiers, et le theme reste 100% statique.
   search: {
-    metaTitle: "Search",
+    metaTitle: "Search Olan Homestay",
     metaDescription:
-      "Search every post on Reef Notes by title, summary, topic or tag. It runs in your browser: nothing is sent to a server and nothing is logged.",
+      "Search stay details, rooms, and family-friendly highlights for Olan Homestay.",
     /** Le nom de la page dans le fil d'Ariane et son balisage : court, distinct du titre donne aux moteurs de recherche. */
     crumb: "Search",
     eyebrow: "Search",
-    title: "Find it again",
-    accent: "again",
+    title: "Find what you need",
+    accent: "need",
     lede:
-      "Search covers titles, summaries, topics and tags. It runs in your browser, so nothing leaves the page and it keeps working offline once loaded.",
-    placeholder: "Search posts, topics and tags",
-    label: "Search the blog",
+      "Search stay details, room notes, and family-friendly highlights about Olan Homestay.",
+    placeholder: "Search stays",
+    label: "Search",
     shortcut: "Press / to search",
-    clear: "Clear search",
+    clear: "Clear",
     /** Affiche avant la premiere frappe. {count} est la taille de l'index. */
-    prompt: "Start typing to search {count} posts.",
+    prompt: "Start typing to search {count} items.",
     resultsLabel: "Search results",
     countLabel: "{count} results",
     countOne: "1 result",
     inTopic: "in {topic}",
-    noResultsTitle: "Nothing matches {query}",
-    noResultsLede: "Try a shorter word, or take the long way round and browse by topic.",
-    noResultsCta: "Browse topics",
+    noResultsTitle: "No matches found",
+    noResultsLede: "Try a shorter word or browse the stay highlights.",
+    noResultsCta: "Browse highlights",
   },
 
   // --- 404 -----------------------------------------------------------------
   notFound: {
     metaTitle: "Page not found",
-    metaDescription: "There is nothing at this address. The archive and the search box both still work.",
+    metaDescription: "This page is not available right now. Please return to the home page.",
     code: "404",
-    title: "Nothing at this address",
-    accent: "Nothing",
+    title: "This page is not available",
+    accent: "available",
     lede:
-      "The link is wrong, or the post moved and we failed to leave a redirect. Neither is your problem. Three ways back, below.",
-    homeCta: "Back to the home page",
-    postsCta: "Browse all posts",
-    searchCta: "Search the blog",
+      "The link may be wrong, or the page may have moved. Please use the options below to continue.",
+    homeCta: "Back to home",
+    postsCta: "View stays",
+    searchCta: "Search",
   },
 
   // --- Mentions legales ----------------------------------------------------
@@ -240,10 +240,10 @@ export const enPages = {
     privacyEyebrow: "Legal",
     termsEyebrow: "Legal",
     /** La date de derniere revision des mentions legales (AAAA-MM-JJ). */
-    updated: "2026-09-24",
+    updated: "2026-10-31",
     eyebrow: "Legal",
     title: "Legal notice",
-    description: "Who publishes this site, who hosts it, and how to reach the publisher.",
+    description: "Who publishes this site, who hosts it, and how to reach Olan Homestay.",
     /** {date} est formatee par formatDate() dans la langue de la page. */
     lastUpdated: "Last updated on {date}",
     toc: "On this page",
@@ -251,19 +251,19 @@ export const enPages = {
     sections: [
       {
         title: "Publisher",
-        body: "This site is published by [studio name], [legal form] registered at [full address], under number [registration number]. Publication director: [name]. Any question about the content[...]",
+        body: "This site is published by Olan Homestay for informational and booking purposes. Contact details are available on the contact page.",
       },
       {
         title: "Hosting",
-        body: "The site is served by [host name], [host address], reachable at [host contact]. Reading a page creates no account and no session: nothing about you is stored on our side.",
+        body: "This site is hosted by a third-party service provider. The hosting provider is responsible for infrastructure and service availability.",
       },
       {
         title: "Content and reuse",
-        body: "The posts, illustrations and code samples published here belong to their authors. Quoting a passage with a link back is welcome and needs no permission. Republishing a whole post i[...]",
+        body: "Text, photos, and design on this site are intended for Olan Homestay. Reuse is only permitted with clear attribution and a link back to the source.",
       },
       {
         title: "Reporting a problem",
-        body: "A factual error, a broken link, a copyright concern: write to the address on the contact page. Corrections are made within two working days and the post carries the date of revisio[...]",
+        body: "If you find a factual error, broken link, or legal issue, please contact us through the contact page so it can be fixed promptly.",
       },
     ],
   },
