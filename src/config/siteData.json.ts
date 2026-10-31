@@ -7,11 +7,11 @@ const siteData: SiteDataProps = {
   name: "Reef",
   // Une valeur par langue : le flux RSS indonesien porte le titre indonesien.
   title: {
-    id: "Reef - tema Astro untuk mereka yang menulis",
-    en: "Reef - the Astro theme for people who write",
+    id: "Olan Homestay | Penginapan Nyaman & Strategis Lebak, Banten",
+    en: "Olan Homestay | Comfortable & Strategic Accommodation in Lebak, Banten",
   },
   description:
-    "A free Astro 7 blog theme built for reading: an editorial home, a post page tuned for eight minutes of attention, topic archives, author pages, client-side search, and a bilingual layer that costs one line per language.",
+    "Cari penginapan homestay di Lebak, Banten? Olan Homestay: kamar nyaman, lokasi strategis, tarif jelas. Cek kamar kosong lewat WhatsApp sekarang juga!",
   useViewTransitions: true,
 
   // La ligne de pied de page qui dit que ce site est une demonstration du
