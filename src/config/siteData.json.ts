@@ -4,7 +4,7 @@ import type { SiteDataProps } from "./types/configDataTypes";
 // Tout ce qui identifie la publication vit ici. C'est le premier fichier que
 // l'utilisateur edite, et le seul a editer pour changer de marque.
 const siteData: SiteDataProps = {
-  name: "Reef",
+  name: "Olan Homestay",
   // Une valeur par langue : le flux RSS indonesien porte le titre indonesien.
   title: {
     id: "Olan Homestay | Penginapan Nyaman & Strategis Lebak, Banten",
@@ -23,7 +23,7 @@ const siteData: SiteDataProps = {
   // d'utilisateur reel, ni domaine que l'on ne possede pas. L'utilisateur met
   // les siens ici, et le pied de page suit.
   author: {
-    name: "Example Studio",
+    name: "Olan Homestay",
     email: "hello@example.com",
     twitter: "",
   },
