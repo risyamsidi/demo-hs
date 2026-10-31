@@ -12,11 +12,11 @@
 export const enPages = {
   // --- Accueil -------------------------------------------------------------
   home: {
-    metaTitle: "Olan Homestay | A calm family stay in Lebak",
+    metaTitle: "Olan Homestay | Comfortable & Strategic Accommodation in Lebak, Banten",
     // La signature courte de la marque : elle allonge un titre de page trop court quand le titre de l'accueil le ferait depasser 60 caracteres (src/js/pageTitle.ts).
-    titleSignature: "Olan Homestay, calm family stay in Lebak",
+    titleSignature: "Olan Homestay, comfortable & strategic accommodation in Lebak, Banten",
     metaDescription:
-      "A peaceful family homestay in Lebak with comfortable rooms, a kids pool, and a relaxed weekend atmosphere for your next getaway.",
+      "Looking for a homestay in Lebak, Banten? Olan Homestay offers cozy rooms, a strategic location, and clear pricing. Check room availability via WhatsApp now!",
     eyebrow: "Olan Homestay",
     heroTitle: "A calm place to rest, reconnect, and feel at home",
     heroAccent: "rest",
@@ -70,9 +70,9 @@ export const enPages = {
     storyTitle: "How the notebook started",
     storyAccent: "notebook",
     storyParagraphs: [
-      "The studio opened in 2019 with one laptop and a spreadsheet of leads. The first year taught us that a website is rarely a design problem: it is a decision problem with a design attached. When we could not make a choice, we wrote it down.",
-      "For three years the answers lived in a private repository. Every time a client asked why a page felt slow, or why we refused to add a fifth typeface, the reasoning was already written down. It only needed to be shaped for people instead of only for ourselves.",
-      "Reef Notes is that repository, cleaned up. Some entries are build logs with numbers in them, some are arguments about type, some cover the unglamorous half of freelancing: scoping, quoting, and being clear about what will and will not be built.",
+      "The studio opened in 2019 with one laptop and a spreadsheet of leads. The first year taught us that a website is rarely a design problem: it is a decision problem with a design attached. Wh[...]",
+      "For three years the answers lived in a private repository. Every time a client asked why a page felt slow, or why we refused to add a fifth typeface, the reasoning was already written down.[...]",
+      "Reef Notes is that repository, cleaned up. Some entries are build logs with numbers in them, some are arguments about type, some cover the unglamorous half of freelancing: scoping, quoting,[...]",
     ],
     valuesTitle: "How we work",
     valuesAccent: "work",
@@ -251,7 +251,7 @@ export const enPages = {
     sections: [
       {
         title: "Publisher",
-        body: "This site is published by [studio name], [legal form] registered at [full address], under number [registration number]. Publication director: [name]. Any question about the content should be directed to the contact page.",
+        body: "This site is published by [studio name], [legal form] registered at [full address], under number [registration number]. Publication director: [name]. Any question about the content[...]",
       },
       {
         title: "Hosting",
@@ -259,11 +259,11 @@ export const enPages = {
       },
       {
         title: "Content and reuse",
-        body: "The posts, illustrations and code samples published here belong to their authors. Quoting a passage with a link back is welcome and needs no permission. Republishing a whole post is only allowed with attribution and a link back to the original.",
+        body: "The posts, illustrations and code samples published here belong to their authors. Quoting a passage with a link back is welcome and needs no permission. Republishing a whole post i[...]",
       },
       {
         title: "Reporting a problem",
-        body: "A factual error, a broken link, a copyright concern: write to the address on the contact page. Corrections are made within two working days and the post carries the date of revision.",
+        body: "A factual error, a broken link, a copyright concern: write to the address on the contact page. Corrections are made within two working days and the post carries the date of revisio[...]",
       },
     ],
   },
