@@ -1,9 +1,9 @@
 export const idPages = {
   home: {
-    metaTitle: "Olan Homestay | Menginap keluarga yang tenang di Lebak",
-    titleSignature: "Olan Homestay, menginap keluarga yang tenang di Lebak",
+    metaTitle: "Olan Homestay | Penginapan Nyaman & Strategis Lebak, Banten",
+    titleSignature: "Olan Homestay, penginapan nyaman & strategis di Lebak, Banten",
     metaDescription:
-      "Homestay keluarga yang tenang di Lebak dengan kamar nyaman, kolam anak, dan suasana akhir pekan yang santai untuk liburan berikutnya.",
+      "Cari penginapan homestay di Lebak, Banten? Olan Homestay: kamar nyaman, lokasi strategis, tarif jelas. Cek kamar kosong lewat WhatsApp sekarang juga!",
     eyebrow: "Olan Homestay",
     heroTitle: "Tempat yang tenang untuk beristirahat dan merasa seperti di rumah",
     heroAccent: "tenang",
